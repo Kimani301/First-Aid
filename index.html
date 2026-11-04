@@ -118,7 +118,7 @@ const store={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---- Firebase (paste your keys from Firebase console > Project settings > Your apps > Web app) ---- */
-const FB={apiKey:'',authDomain:'',projectId:'',appId:''};
+const FB={apiKey:'AIzaSyCVURoAHXiYB-dek6CQmdGbILCs38IH89g',authDomain:'first-aid-862d5.firebaseapp.com',projectId:'first-aid-862d5',appId:'1:531791459802:web:81be35a988ba6de91ebce3'};
 let fbAuth=null,fbDb=null;
 if(FB.apiKey&&typeof firebase!=='undefined'){try{firebase.initializeApp(FB);fbAuth=firebase.auth();fbDb=firebase.firestore()}catch(e){}}
 const useFB=!!fbDb;
