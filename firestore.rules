@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isAdmin() {
+      return signedIn() &&
+        get(/databases/$(database)/documents/Users/$(request.auth.uid)).data.role == 'Admin';
+    }
+
+    // Profiles: you can read/create your own; nobody can make themselves Admin.
+    // Create admins by editing the "role" field in the Firebase console.
+    match /Users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.role in ['Student', 'Teacher']
+        && request.resource.data.keys().hasOnly(['name', 'email', 'role', 'emergencyContacts']);
+      allow update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.role == resource.data.role;
+      allow delete: if false;
+    }
+
+    // SOS alerts: any signed-in user can raise one for themselves; only admins read them
+    // and the only thing an admin can change is the status.
+    match /Emergencies/{id} {
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'New'
+        && request.resource.data.keys().hasOnly(['name', 'lat', 'lng', 'userId', 'status', 'time']);
+      allow read: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['New', 'Responding', 'Resolved'];
+      allow delete: if false;
+    }
+
+    // Shared emergency numbers: everyone signed in reads, only admins edit.
+    match /Settings/{doc} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

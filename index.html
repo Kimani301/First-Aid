@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="First aid guides, emergency contacts and SOS alerts.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="./icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="FirstAid">
+<title>FirstAid</title>
+<style>
+:root{--navy:#8f0d1c;--navy2:#e11d2e;--green:#e11d2e;--red:#e11d2e;--ink:#2a0d12;--bg:#fff4f4;--card:#fff;--mut:#8a5a60;--line:#f6dcdc;--sh:0 6px 22px rgba(143,13,28,.12)}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;max-width:560px;margin:0 auto}
+header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:calc(12px + env(safe-area-inset-top,0px)) 14px 14px;display:flex;align-items:center;gap:8px;border-radius:0 0 22px 22px;box-shadow:0 8px 24px rgba(143,13,28,.3);z-index:2}
+header h1{font-size:20px;font-weight:700;flex:1;letter-spacing:.2px}
+header button{background:rgba(255,255,255,.14);border:0;color:#fff;font-size:20px;width:40px;height:40px;border-radius:50%}
+header button[hidden]{display:none}
+main{flex:1;overflow-y:auto;padding:16px 16px 8px}
+nav{display:flex;align-items:flex-end;background:var(--card);margin:6px 12px calc(10px + env(safe-area-inset-bottom,0px));border-radius:24px;box-shadow:var(--sh);padding:6px 4px}
+nav button{flex:1;background:none;border:0;padding:6px 0;font-size:11.5px;color:var(--mut);border-radius:16px}
+nav button b{display:block;font-size:20px;font-weight:400;line-height:1.3}
+nav button.on{color:var(--navy2);font-weight:700}
+nav button.sosn b{width:54px;height:54px;margin:-26px auto 2px;border-radius:50%;background:var(--red);display:grid;place-items:center;font-size:22px;box-shadow:0 6px 16px rgba(225,29,46,.5);border:4px solid var(--card)}
+nav button.sosn{color:var(--red);font-weight:700}
+.ban{display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:22px;padding:14px 18px;margin-bottom:14px;color:#fff;background:linear-gradient(135deg,#8f0d1c,#e11d2e);box-shadow:var(--sh)}
+.ban b{font-size:18px;line-height:1.25;max-width:55%}
+.ban svg{flex:none;width:128px;height:96px}
+.hero{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.cross{flex:none;display:grid;place-items:center;width:58px;height:58px;border-radius:18px;background:#fff;color:var(--red);font-size:40px;font-weight:900;line-height:1;box-shadow:var(--sh)}
+.hero h2{font-size:26px;line-height:1.1}.hero p{color:var(--mut);font-size:14px}
+.alert{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:0;border-radius:20px;padding:16px;margin-bottom:14px;color:#fff;background:linear-gradient(135deg,#7f0f1e,#3b0610);box-shadow:0 10px 24px rgba(59,6,16,.35);font-size:17px;font-weight:700}
+.alert small{display:block;font-weight:400;opacity:.92;font-size:13px}
+.alert i{flex:none;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-style:normal;font-size:22px;font-weight:800}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gt{display:flex;flex-direction:column;align-items:flex-start;gap:10px;text-align:left;background:var(--card);border:0;border-radius:20px;padding:14px;box-shadow:var(--sh);color:var(--ink);font-size:15.5px;font-weight:650;line-height:1.25}
+.gt.wide{grid-column:1/-1;flex-direction:row;align-items:center}
+.gt small{display:block;color:var(--mut);font-weight:400;font-size:12.5px;margin-top:2px}
+.gt i,.tile i{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-style:normal;font-size:22px;background:var(--c,#2563c9)}
+.tile{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--card);border:0;border-radius:18px;padding:12px 14px;box-shadow:var(--sh);color:var(--ink);font-size:16px;font-weight:650;margin-bottom:10px}
+.tile small{display:block;color:var(--mut);font-weight:400;font-size:13px}
+.tile::after{content:'›';margin-left:auto;color:var(--mut);font-size:26px}
+.gt:active,.tile:active,.alert:active{transform:scale(.98)}
+.sosbtn{display:block;margin:20px auto 8px;width:160px;height:160px;border-radius:50%;border:10px solid rgba(225,29,46,.18);background:radial-gradient(circle at 35% 30%,#ff5566,var(--red) 60%,#a30d1c);color:#fff;font-size:40px;font-weight:800;animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(225,29,46,.45)}70%,100%{box-shadow:0 0 0 26px rgba(225,29,46,0)}}
+@media(prefers-reduced-motion:reduce){.sosbtn{animation:none}}
+.card{background:var(--card);border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:var(--sh)}
+.card h3{font-size:17px;margin-bottom:6px}
+.row{display:flex;align-items:center;gap:10px}.row>div{flex:1;min-width:0}
+.btn{border:0;border-radius:14px;padding:12px 16px;font-size:15px;font-weight:650;background:var(--green);color:#fff}
+.btn.red{background:var(--red)}.btn.ghost{background:var(--line);color:var(--ink)}
+.btn.block{display:block;width:100%}
+input{width:100%;padding:13px;border:1.5px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);font-size:16px;margin-bottom:8px}
+input:focus{outline:2px solid var(--navy2);border-color:transparent}
+.gh{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.gh i{width:62px;height:62px;border-radius:20px;display:grid;place-items:center;font-style:normal;font-size:32px;background:var(--card);box-shadow:var(--sh)}
+.step{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.step:last-child{border:0}
+.step span{flex:none;width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+.warn{background:#fff4d6;color:#6a4b00;border-radius:14px;padding:12px;font-size:14px;margin:12px 0}
+.mut{color:var(--mut);font-size:14px}
+.opt{display:block;width:100%;text-align:left;margin-bottom:10px;padding:14px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:16px}
+.opt.ok{border-color:var(--green);background:#dff5e8;color:#0d4a27}.opt.bad{border-color:var(--red);background:#fde3e3;color:#7a1414}
+.bar{height:8px;background:var(--line);border-radius:4px;margin:6px 0 16px}.bar i{display:block;height:100%;background:var(--green);border-radius:4px}
+#ov{position:fixed;inset:0;background:linear-gradient(160deg,#f0364a,#a30d1c);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;z-index:9}
+#ov.show{display:flex}
+#ov .big{font-size:96px;font-weight:800;line-height:1}
+#ov .btn{background:#fff;color:var(--red);margin-top:10px;min-width:200px}
+a{color:inherit}
+@media(min-width:800px){
+body{max-width:none}
+header{padding-left:max(24px,calc((100% - 1000px)/2));padding-right:max(24px,calc((100% - 1000px)/2))}
+main{padding:24px max(24px,calc((100% - 1000px)/2)) 12px}
+.grid{grid-template-columns:repeat(3,1fr)}
+.gt.wide{grid-column:auto;flex-direction:column;align-items:flex-start}
+.ban svg{width:170px;height:128px}.ban b{font-size:22px}
+nav{width:640px;max-width:100%;margin:6px auto 14px}
+#ov{padding:48px}
+}
+/* red and white blend */
+:root{color-scheme:light;--bg:#ffffff;--ink:#3b0a12;--line:#f1d3d7}
+.card,.gt,.tile,.opt,nav{border:1px solid var(--line)}
+:root{--bg:#fdf4f5;--line:#f3dcdf;--mut:#7d6469;--ink:#2b1a1d;--sh:0 4px 18px rgba(143,13,28,.08);--head:#c81428}
+header{background:var(--card);color:var(--head);box-shadow:0 4px 18px rgba(143,13,28,.1);border-bottom:3px solid #e11d2e}
+header h1{color:var(--head)}
+header button{background:#ffe3e6;color:#c81428}
+.ban{background:linear-gradient(135deg,#fff,#ffe6e9);color:var(--head);border:1px solid var(--line)}
+.cross{background:#e11d2e;color:#fff}
+.hero h2{color:var(--head)}
+.alert{background:linear-gradient(135deg,#ef3347,#c8102e);box-shadow:0 10px 24px rgba(225,29,46,.3)}
+.gt i,.tile i{background:#ffe3e6}
+nav button.on{color:var(--head)}
+:root{--bg:#ffffff;--ink:#3b0a12;--line:#f1d3d7}
+.pill{padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;background:#ffe3e6;color:#c81428}.pill.Responding{background:#fff1d6;color:#8a5a00}.pill.Resolved{background:#dff5e8;color:#0d4a27}
+nav:empty{display:none}
+#back{width:auto;border-radius:20px;padding:0 14px;font-size:15px;font-weight:600}
+</style>
+</head>
+<body>
+<header><button id="back" aria-label="Back" hidden>‹ Back</button><h1 id="ttl">FirstAid</h1><button id="callnow" aria-label="Call 112" onclick="location.href='tel:'+mainNum()">📞</button></header>
+<main id="app"></main>
+<nav id="nav"></nav>
+<div id="ov" role="alertdialog" aria-live="assertive"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const store={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---- Firebase (paste your keys from Firebase console > Project settings > Your apps > Web app) ---- */
+const FB={apiKey:'',authDomain:'',projectId:'',appId:''};
+let fbAuth=null,fbDb=null;
+if(FB.apiKey&&typeof firebase!=='undefined'){try{firebase.initializeApp(FB);fbAuth=firebase.auth();fbDb=firebase.firestore()}catch(e){}}
+const useFB=!!fbDb;
+const ADMIN_HASH='1d460e02'; // admin password is stored as a hash, not as plain text
+const hashPw=s=>{let x=0x811c9dc5;for(const c of s){x^=c.charCodeAt(0);x=Math.imul(x,0x01000193)>>>0}return x.toString(16)};
+const DB={
+  async saveAlert(a){
+    if(useFB){try{await fbDb.collection('Emergencies').add({...a,userId:fbAuth.currentUser?fbAuth.currentUser.uid:null,status:'New',time:firebase.firestore.FieldValue.serverTimestamp()});return}catch(e){}}
+    const t=Date.now(),l=store.get('allAlerts',[]);l.unshift({...a,id:'L'+t,time:t,status:'New'});store.set('allAlerts',l.slice(0,100));
+  },
+  watch(cb){
+    if(useFB){return fbDb.collection('Emergencies').orderBy('time','desc').limit(100).onSnapshot(
+      s=>cb(s.docs.map(d=>{const x=d.data();return{...x,id:d.id,time:x.time&&x.time.toMillis?x.time.toMillis():Date.now()}}),''),
+      e=>cb(null,e.message))}
+    const f=()=>cb(store.get('allAlerts',[]),'');f();const id=setInterval(f,4000);return()=>clearInterval(id);
+  },
+  saveNums(l){if(useFB)fbDb.collection('Settings').doc('numbers').set({list:l.map(x=>({name:x[0],phone:x[1]}))}).catch(()=>{})},
+  async setStatus(id,st){
+    if(useFB){await fbDb.collection('Emergencies').doc(id).update({status:st});return}
+    const l=store.get('allAlerts',[]),x=l.find(a=>a.id===id);if(x)x.status=st;store.set('allAlerts',l);
+  }
+};
+const GUIDES=[
+{t:'Choking',i:'😮',s:['Encourage the person to cough.','Give up to 5 back blows between the shoulder blades.','Give up to 5 abdominal thrusts (stand behind, fist above the navel, pull inward and upward).','Alternate back blows and thrusts. Call 112 if it does not clear.','If the person becomes unresponsive, start CPR and keep calling for help.']},
+{t:'Severe bleeding',i:'🩸',s:['Press firmly on the wound with a clean cloth or gloved hand.','Keep pressing. Do not remove soaked cloth; add more on top.','Raise the injured limb if you do not suspect a broken bone.','Bandage firmly once bleeding slows.','Call 112 for heavy bleeding or if it does not stop in 10 minutes.']},
+{t:'Burns',i:'🔥',s:['Cool the burn under cool running water for 20 minutes.','Remove rings, watches and tight clothing near the burn before it swells.','Cover loosely with clean cling film or a clean non-fluffy cloth.','Do not burst blisters. Do not apply butter, oil or toothpaste.','Get medical help for large burns, or burns on the face, hands or genitals.']},
+{t:'Nosebleed',i:'👃',s:['Sit upright and lean forward slightly.','Pinch the soft part of the nose for 10 minutes without letting go.','Breathe through the mouth. Do not tilt the head back.','Apply a cold cloth to the bridge of the nose.','Seek help if bleeding lasts over 20 minutes or follows a head injury.']},
+{t:'Fainting',i:'😵',s:['Lay the person flat and raise their legs about 30 cm.','Loosen tight clothing and give fresh air.','Check that they are breathing.','When they wake, let them sit up slowly and sip water.','Call 112 if they do not recover within 1 minute or are not breathing.']},
+{t:'Sprain or broken bone',i:'🦴',s:['Keep the injured part still. Do not try to straighten it.','Support it with padding or a sling.','Apply a cold pack wrapped in cloth for 15 minutes.','Do not let the person eat or drink if a broken bone is suspected.','Get medical help.']},
+{t:'Seizure',i:'⚡',s:['Clear hard objects away and cushion the head.','Do not hold the person down or put anything in their mouth.','Note the time the seizure started.','When shaking stops, turn them on their side (recovery position).','Call 112 if it lasts over 5 minutes, repeats, or the person is injured or does not wake up.']},
+{t:'Snake bite',i:'🐍',s:['Keep the person calm and still.','Remove rings and tight items near the bite.','Keep the bitten limb still and below heart level.','Do not cut, suck, or tie a tight band around the bite.','Take the person to a hospital quickly or call 112.']},
+{t:'CPR (not breathing)',i:'🫀',s:['Check the scene is safe, tap the person and shout for help.','Call 112 or ask someone to, and send for an AED if there is one.','Lay them on a firm surface. Place the heel of your hand on the centre of the chest.','Push hard and fast, about 5 to 6 cm deep, 100 to 120 times a minute.','If trained, give 2 rescue breaths after every 30 pushes. Keep going until help arrives.']},
+{t:'Cuts and scrapes',i:'🩹',s:['Wash your hands, then rinse the wound with clean water.','Press with a clean cloth to stop any bleeding.','Cover with a clean dressing and change it daily.','Watch for redness, swelling, pus or fever. See a clinic if you notice these.']},
+{t:'Insect sting',i:'🐝',s:['Scrape the sting out sideways. Do not squeeze it.','Wash with soap and water.','Apply a cold pack for 10 minutes.','Call 112 if the face or throat swells, or breathing becomes hard.']},
+{t:'Poisoning',i:'☠️',s:['Move the person away from the poison.','Do not make them vomit.','Keep the container or label to show the doctor.','Call 112 or go to a hospital at once.','If unconscious but breathing, place them on their side.']},
+{t:'Heat exhaustion',i:'☀️',s:['Move to a shaded, cool place.','Loosen clothing and cool with wet cloths.','Give small sips of water.','Call 112 if they are confused, have hot dry skin, or become unconscious.']},
+{t:'Asthma attack',i:'😮‍💨',s:['Sit the person upright and keep them calm.','Help them use their reliever inhaler: 1 puff, 4 breaths, repeat up to 10 puffs.','Loosen tight clothing.','Call 112 if there is no improvement in 10 minutes or they cannot speak.']},
+{t:'Eye injury',i:'👁️',s:['Do not rub the eye.','For chemicals or dust, rinse with clean water for 15 minutes.','Do not remove anything stuck in the eye.','Cover loosely with a clean pad and get medical help.']},
+{t:'Electric shock',i:'🔌',s:['Do not touch the person until the power is off.','Switch off at the main switch or use a dry wooden object to separate them.','Call 112 and check breathing. Start CPR if needed.','Cool any burns with running water.']},
+{t:'Drowning',i:'🌊',s:['Do not jump in. Reach with a pole or throw a rope or float.','Call 112.','Once out, check breathing. Start CPR if not breathing.','Keep them warm and on their side if breathing.']},
+{t:'Head injury',i:'🤕',s:['Keep the person still and apply a cold pack.','Watch for vomiting, drowsiness, confusion or a severe headache.','Call 112 if any of these appear.','No sport or play until a doctor says it is safe.']},
+{t:'Diarrhoea and dehydration',i:'💧',s:['Give small, frequent sips of ORS or clean water.','Home ORS: 6 level teaspoons sugar and half a teaspoon salt in 1 litre of clean water.','Keep feeding normally.','Go to a clinic if there is blood, high fever, or they cannot drink.']},
+{t:'Allergic reaction',i:'🤧',s:['Move away from the trigger.','For mild itching or rash, use an antihistamine as advised.','If the face or throat swells or breathing is hard, call 112 now.','Lay them flat and use an adrenaline pen if one is available.']},
+{t:'Dog bite',i:'🐕',s:['Wash the wound with soap and running water for 10 minutes.','Cover with a clean dressing.','Go to a clinic the same day for rabies and tetanus protection.','Note the dog and where it lives.']},
+{t:'Fever',i:'🌡️',s:['Rest, drink plenty of fluids and wear light clothing.','Give paracetamol as the label directs.','Sponge with lukewarm water if very hot.','Get tested for malaria if in a risk area. See a doctor if fever lasts over 2 days or comes with fits, stiff neck or rash.']}
+];
+const TIPS=[
+{c:'Accident prevention',i:'🚸',l:['Walk, do not run, on stairs and in corridors.','Wipe up spills and report broken furniture.','Keep bags and shoes out of walkways.','Do not push or play rough near stairs and doors.','Tell a teacher about anything dangerous you see.']},
+{c:'Fire safety',i:'🧯',l:['Know the nearest exit and the assembly point.','Stay low under smoke and never use a lift.','Never play with matches or lighters.','If clothes catch fire: stop, drop and roll.','Switch off and unplug appliances when not in use.']},
+{c:'Hygiene',i:'🧼',l:['Wash hands with soap before eating and after the toilet.','Cover coughs and sneezes with your elbow.','Keep nails short and clean.','Do not share cups, towels or razors.','Bathe daily and wear clean clothes.']},
+{c:'Healthy living',i:'🥗',l:['Drink safe water through the day.','Sleep 8 to 10 hours.','Eat fruit and vegetables every day.','Be active for about an hour a day.','Tell a teacher or parent when you feel unwell.']},
+{c:'Road and transport',i:'🚦',l:['Use a crossing and look right, left, then right again.','Wear a helmet on a motorbike and a seat belt in a car.','Never board an overloaded vehicle.','Wait for the vehicle to stop before getting on or off.','Walk facing traffic when there is no pavement.']},
+{c:'Water safety',i:'🌊',l:['Never swim alone.','Stay away from rivers and streams after heavy rain.','Learn to swim and wear a life jacket on boats.','Keep water containers covered, especially near young children.','If someone is drowning, reach or throw, do not jump in.']},
+{c:'Electrical safety',i:'🔌',l:['Never touch switches or plugs with wet hands.','Do not overload sockets.','Keep away from fallen wires and report them.','Pull the plug, not the cord.','Unplug devices during storms.']},
+{c:'Kitchen and home',i:'🍳',l:['Turn pot handles inward and never leave cooking unattended.','Keep matches and lighters away from young children.','Store kerosene, bleach and pesticides in labelled containers out of reach.','Keep knives and sharp tools put away.','Know where the nearest exit is at home.']},
+{c:'Online safety',i:'📱',l:['Never share passwords, your address or your school online.','Do not open links or files from strangers.','Be kind online and think before you post.','Tell an adult if something online upsets you.','Never meet an online friend alone.']},
+{c:'Personal safety',i:'🛡️',l:['Walk with friends and avoid dark, empty paths.','Tell someone where you are going.','Do not accept lifts or gifts from strangers.','If a touch feels wrong, say no, get away and tell a trusted adult.','Know the phone numbers of trusted adults.']},
+{c:'Weather and floods',i:'⛈️',l:['Shelter indoors during lightning and keep away from trees.','Never cross flooded roads or rivers.','Wear a hat and drink water in strong sun.','Stay away from broken power lines after storms.','Listen to teachers and weather warnings.']},
+{c:'Food and water safety',i:'🍲',l:['Boil or treat drinking water if unsure.','Wash fruit and vegetables.','Keep raw and cooked food apart.','Cover food and throw away old food.','Wash hands before cooking and eating.']},
+{c:'Disease prevention',i:'🦟',l:['Sleep under a treated mosquito net.','Clear standing water around the home.','Keep up with your vaccinations.','Go to a clinic early when you have a fever.','Do not share needles, razors or toothbrushes.']},
+{c:'Medicine safety',i:'💊',l:['Only take medicine given to you by a parent, doctor or pharmacist.','Read the label and dose every time.','Check the expiry date.','Keep medicines out of reach of young children.','Never share your medicine with others.']},
+{c:'Mental wellbeing',i:'💬',l:['Talk to someone you trust when you feel worried or sad.','Take breaks and get enough sleep.','Tell a teacher about bullying, even if it is not you.','It is okay to ask for help.','Include others and be kind.']},
+{c:'School and playground',i:'🏫',l:['Use playground equipment the way it is meant to be used.','No pushing or rough play.','Stay in the allowed areas.','Report broken equipment.','Take fire drills seriously and follow your teacher.']}
+];
+const BANK=[
+["Your friend has a nosebleed in class. What should you do?",["Tilt the head back","Sit up, lean forward and pinch the soft nose for 10 minutes","Lay them flat","Stuff paper in the nose"],1,"Leaning forward stops blood going down the throat; pinching presses the bleeding point."],
+["You touch a hot pan and get a small burn. First step?",["Rub butter on it","Burst any blister","Cool it under running water for 20 minutes","Cover it with toothpaste"],2,"Cool running water stops the burn going deeper and eases pain."],
+["A classmate faints in the assembly. What helps most?",["Sit them up quickly","Lay them flat and raise their legs","Pour water on their face","Shake them awake"],1,"Raising the legs helps blood flow back to the brain."],
+["Someone is choking but coughing loudly. You should…",["Hit their back hard at once","Encourage them to keep coughing","Give them water","Turn them upside down"],1,"A strong cough is the best way to clear the airway. Only step in if the cough weakens."],
+["You get a small cut while playing. What do you do?",["Leave it open to dry","Rinse with clean water and cover with a clean dressing","Put soil on it","Rub it with a dirty cloth"],1,"Cleaning and covering prevents infection."],
+["What is the best way to stop colds and stomach bugs spreading?",["Share cups","Wash hands with soap and water","Cough into your hand","Skip meals"],1,"Handwashing removes germs that spread illness."],
+["How long should you wash your hands?",["2 seconds","About 20 seconds","5 minutes","Only rinse"],1,"Twenty seconds of scrubbing with soap removes most germs."],
+["A child has watery diarrhoea. What is the key action?",["Stop all fluids","Give small frequent sips of clean water or ORS","Give only soda","Give strong tablets from a friend"],1,"Diarrhoea loses water and salts; ORS replaces them."],
+["You feel dizzy after playing in the hot sun. You should…",["Keep running","Rest in the shade and sip water","Drink a very cold sugary drink fast","Lie in the sun"],1,"Cooling down and rehydrating treats early heat illness."],
+["A bee stings you and the stinger is still in. What do you do?",["Squeeze it with fingers","Scrape it out sideways and apply a cold pack","Cut the skin","Ignore swelling of the face"],1,"Scraping avoids squeezing more venom in. Swelling of the face or breathing trouble needs 112."],
+["You find a person not responding and not breathing normally. First action?",["Wait to see","Call 112 for help and start chest compressions","Give food","Move them to a chair"],1,"Quick help and compressions keep blood moving to the brain."],
+["Cooking oil catches fire in the kitchen. What do you do?",["Pour water on it","Turn off the heat and cover with a lid or damp cloth","Carry the pan outside","Blow on it"],1,"Water makes an oil fire spread. Covering cuts off the air."],
+["You smell gas in the house. What first?",["Light a match to check","Switch lights on","Open windows, avoid sparks, leave and call for help","Cook faster"],2,"Gas ignites from sparks, so avoid switches and flames and get out."],
+["A person is stuck to a live electric wire. What do you do first?",["Pull them by the arm","Switch off the power before touching them","Pour water on them","Shout and wait"],1,"If you touch them while the power is on, you will be shocked too."],
+["What is the safest way to cross a road?",["Run across","Use a crossing, look both ways and wait for a gap","Cross while on your phone","Follow the crowd"],1,"Looking and waiting lets you judge traffic speed and distance."],
+["You ride as a passenger on a motorbike. What should you wear?",["A cap","A properly fitted helmet","Nothing special","A scarf"],1,"A helmet greatly reduces head injury in a crash."],
+["A thunderstorm starts while you are outside. Where is safest?",["Under a tall tree","Inside a building or hard-topped vehicle","In open fields","Next to a metal fence"],1,"Tall trees and open ground attract lightning."],
+["You come to a road covered with flood water. You should…",["Walk through quickly","Not cross it and find another route","Drive through slowly","Let children play in it"],1,"Floodwater hides holes and strong currents; even shallow fast water can sweep a person away."],
+["A friend offers you unlabelled tablets for a headache. You…",["Take them","Refuse and ask a parent or pharmacist","Take half","Take two to be safe"],1,"Unknown medicine can be dangerous or wrong for you."],
+["A stranger offers you a lift home. What do you do?",["Accept if friendly","Say no, walk away and tell a trusted adult","Ask for money","Give your address"],1,"Never go with people you do not know."],
+["The fire alarm rings at school. What do you do?",["Collect all bags first","Leave calmly by the nearest exit to the assembly point","Hide in the toilet","Run back for friends"],1,"A calm, quick exit saves lives; never go back in."],
+["You receive some pocket money. What is a good habit?",["Spend it all at once","Save part of it first, then spend the rest wisely","Lend it all out","Hide it and forget"],1,"Saving first builds a cushion for needs and goals."],
+["You have many tasks and little time. Where do you start?",["The easiest","The most urgent and important","The one you like","None"],1,"Ordering by urgency and importance prevents missed deadlines."],
+["You have exams next week. Best study plan?",["All night before","Short daily sessions with breaks","Read once only","Study with the TV on"],1,"Spaced practice with rest helps memory more than cramming."],
+["You are sleepy in class every day. What is the best long-term fix?",["Drink soda","Sleep 8 to 10 hours at regular times","Skip breakfast","Study at 3 am"],1,"Sleep is when the brain stores what you learn."],
+["You forgot your homework. What is the best response?",["Lie about it","Tell the teacher honestly and ask to submit soon","Copy a friend","Skip class"],1,"Honesty builds trust and usually gets you a chance to fix it."],
+["You lose your school ID or phone. What first?",["Ignore it","Tell a parent or teacher and report it quickly","Blame a friend","Buy another secretly"],1,"Quick reporting limits misuse and helps recovery."],
+["You see a classmate being bullied. What can you do?",["Join in","Support them and tell a teacher","Film it for fun","Walk away and say nothing"],1,"Speaking up safely and getting an adult involved helps stop bullying."],
+["You are very angry at someone. What helps?",["Shout back","Breathe slowly, step away and talk when calm","Hit something","Spread rumours"],1,"Calming down first avoids words and actions you regret."],
+["Friends pressure you to try drugs. You should…",["Try once","Say no firmly, leave and tell a trusted adult","Pretend to take them","Join to fit in"],1,"You can say no without losing real friends."],
+["You feel very stressed before a test. What helps?",["Hide it forever","Take slow breaths, short breaks and talk to someone you trust","Stay up all night","Skip meals"],1,"Rest and support reduce stress and improve focus."],
+["You and a sibling both want the same item. A good solution is to…",["Fight","Talk calmly and take turns or share","Hide it","Break it"],1,"Taking turns settles things without harm."],
+["A friend seems very sad for many days. What is helpful?",["Laugh at them","Listen kindly and encourage them to talk to an adult","Tell everyone","Ignore it"],1,"Listening and linking them to trusted help can make a big difference."],
+["Someone online asks for your home address. You…",["Send it","Do not share and tell a trusted adult","Send a fake one","Ask them to visit"],1,"Personal details can be used to find or harm you."],
+["A message says you won a prize and asks for your PIN or money. This is…",["A real prize","Probably a scam; do not reply or share details","Safe if from a friend","Worth sending a small fee"],1,"Real prizes never ask for your PIN or advance fees."],
+["Which is the strongest password?",["12345678","Your name","A long mix of letters, numbers and symbols you do not share","Your birthday"],2,"Longer and varied passwords are harder to guess."],
+["You receive a hurtful message online. What do you do?",["Reply angrily","Do not reply, save it and tell a trusted adult","Forward it to all","Delete everything"],1,"Evidence helps adults act, and replying can make it worse."],
+["You are unsure if your drinking water is safe. You should…",["Drink it anyway","Boil it for at least 1 minute or treat it first","Drink it cold","Add sugar"],1,"Boiling kills germs that cause diarrhoea and typhoid."],
+["Cooked food has been left out in the heat for many hours. You should…",["Eat it","Throw it away","Reheat once and eat","Give it to children"],1,"Germs multiply fast in warm food; reheating may not make it safe."],
+["How should you prepare raw fruit and vegetables?",["Eat straight from the field","Wash with clean safe water","Rub with a dirty cloth","Soak in soda"],1,"Washing removes soil, germs and chemical residue."],
+["How can you help prevent malaria at home?",["Leave water standing","Sleep under a treated net and remove standing water","Open windows at dusk with no net","Wear dark clothes only"],1,"Nets stop bites and clearing water removes mosquito breeding sites."],
+["How should leftover cooked food be stored?",["Left open on the table","Covered and cooled, then kept in a cool place or fridge","In the sun","Mixed with raw food"],1,"Covering and cooling slows germs and keeps pests away."],
+["How often should you brush your teeth?",["Once a week","Twice a day","Only when they hurt","Never"],1,"Regular brushing prevents cavities and gum disease."],
+["What is the emergency number used in this app for an ambulance?",["112","555","100","777"],0,"112 is the main emergency number. Always check your local official numbers."],
+["Why wear a seat belt in a car or bus?",["It looks good","It greatly reduces injury in a crash","It is for the driver only","No reason"],1,"A belt stops you being thrown around or out in a crash."],
+["A dog bites you. What should you do?",["Do nothing","Wash the wound with soap and running water for 10 minutes, then seek medical care","Tie it tightly","Put pepper on it"],1,"Washing lowers infection risk, and a clinic can check rabies and tetanus protection."]
+];
+const rng=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const dayKey=()=>{const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()};
+function daily(n=0){const r=rng(dayKey()+n*7919),a=BANK.map((_,i)=>i);for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a.slice(0,15).map(i=>BANK[i])}
+const defaults=[['Ambulance','112'],['Police','999'],['Fire brigade','998']];
+const getNums=()=>store.get('numbers',defaults);
+const mainNum=()=>(getNums()[0]||['','112'])[1];
+const S={route:'home',arg:null,q:{i:0,sc:0,done:false,pick:null}};
+const NAV=[['home','🏠','Home'],['guides','➕','Guides'],['sos','🆘','SOS'],['contacts','📇','Contacts'],['more','⋯','More']];
+
+const W='#e11d2e',P='#ffc9cf',R='#fff';
+const BAN={
+home:['Your safety companion at school',`<rect x="18" y="30" width="84" height="58" rx="10" fill="${W}"/><path d="M44 30v-8a5 5 0 0 1 5-5h22a5 5 0 0 1 5 5v8" stroke="${W}" stroke-width="6" fill="none"/><rect x="54" y="40" width="12" height="38" rx="2" fill="${R}"/><rect x="41" y="53" width="38" height="12" rx="2" fill="${R}"/>`],
+guides:['Learn what to do, step by step',`<rect x="30" y="10" width="60" height="80" rx="8" fill="${W}"/><rect x="40" y="26" width="40" height="6" rx="3" fill="${P}"/><rect x="40" y="40" width="40" height="6" rx="3" fill="${P}"/><rect x="40" y="54" width="26" height="6" rx="3" fill="${P}"/><rect x="66" y="62" width="10" height="24" rx="2" fill="${R}"/><rect x="59" y="69" width="24" height="10" rx="2" fill="${R}"/>`],
+sos:['Help is one tap away',`<path d="M30 72a30 30 0 0 1 60 0z" fill="${W}"/><rect x="20" y="72" width="80" height="14" rx="5" fill="${P}"/><path d="M60 10v10M30 22l7 7M90 22l-7 7" stroke="${W}" stroke-width="5" stroke-linecap="round"/><text x="60" y="66" text-anchor="middle" font-size="17" font-weight="800" fill="${R}" font-family="sans-serif">SOS</text>`],
+contacts:['Know who to call',`<circle cx="42" cy="34" r="14" fill="${W}"/><path d="M16 86a26 26 0 0 1 52 0z" fill="${W}"/><rect x="76" y="22" width="30" height="52" rx="7" fill="${W}"/><rect x="81" y="31" width="20" height="30" rx="2" fill="${P}"/><circle cx="91" cy="67" r="2.5" fill="${R}"/>`],
+tips:['Prevent accidents before they happen',`<path d="M60 8 100 22v26c0 22-18 36-40 44C38 84 20 70 20 48V22z" fill="${W}"/><rect x="56" y="30" width="8" height="28" rx="4" fill="${R}"/><circle cx="60" cy="70" r="5" fill="${R}"/>`],
+quiz:['Solve everyday problems',`<path d="M60 20 108 40 60 60 12 40z" fill="${W}"/><path d="M30 52v18c0 9 60 9 60 0V52L60 66z" fill="${P}"/><path d="M108 40v26" stroke="${W}" stroke-width="4" stroke-linecap="round"/>`],
+health:['Find care near you',`<ellipse cx="60" cy="90" rx="24" ry="5" fill="${P}"/><path d="M60 8a28 28 0 0 1 28 28c0 22-28 52-28 52S32 58 32 36A28 28 0 0 1 60 8z" fill="${W}"/><rect x="55" y="24" width="10" height="26" rx="2" fill="${R}"/><rect x="47" y="32" width="26" height="10" rx="2" fill="${R}"/>`],
+alerts:['Your past alerts',`<circle cx="60" cy="50" r="38" fill="${W}"/><path d="M60 26v26l18 10" stroke="${R}" stroke-width="6" fill="none" stroke-linecap="round"/>`]
+};
+BAN.admin=['Monitor emergency alerts',BAN.alerts[1]];BAN.login=['Welcome. Sign in to continue',BAN.home[1]];
+const banner=k=>BAN[k]?`<div class="ban"><b>${BAN[k][0]}</b><svg viewBox="0 0 120 100" aria-hidden="true">${BAN[k][1]}</svg></div>`:'';
+function go(r,a,nopush){S.hist=S.hist||[];if(!nopush&&S.route&&S.route!==r&&S.route!=='login'){S.hist.push({route:S.route,arg:S.arg});history.pushState(null,'')}S.nums=null;if(S.unsub){S.unsub();S.unsub=null}S.route=r;S.arg=a??null;if(r==='admin'){S.alerts=null;S.lastJ='';S.unsub=DB.watch((x,err)=>{const j=JSON.stringify(x)+err;if(j===S.lastJ)return;S.lastJ=j;S.alerts=x;S.err=err;if(S.route==='admin')render()})}if(r==='quiz'){S.round=0;S.q={i:0,sc:0,done:false,pick:null}}render();$('#app').scrollTop=0}
+function doBack(){const p=(S.hist||[]).pop();go(p?p.route:'home',p?p.arg:null,true)}
+function navTo(r){S.hist=[];go(r,null,true)}
+$('#back').onclick=()=>{if((S.hist||[]).length)history.back();else doBack()};
+window.addEventListener('popstate',()=>{if(S.route!=='home'&&S.route!=='login')doBack()});
+
+function render(){
+  if(!store.get('profile',null)&&S.route!=='login')S.route='login';
+  const r=S.route,A=$('#app');
+  $('#back').hidden=r==='home'||r==='login';
+  $('#nav').innerHTML=NAV.map(n=>`<button class="${n[0]===r||(r==='guide'&&n[0]==='guides')?'on':''}${n[0]==='sos'?' sosn':''}" onclick="navTo('${n[0]}')"><b>${n[1]}</b>${n[2]}</button>`).join('');
+  if(r==='login')$('#nav').innerHTML='';
+  const V={home,guides,guide,sos,contacts,more,tips,quiz,health,alerts,login,admin};
+  const o=V[r]();$('#ttl').textContent=o[0];A.innerHTML=(r==='home'?'':banner(r))+o[1];
+}
+
+function home(){
+  const g=[['guides','#e11d2e','➕','First aid guide',GUIDES.length+' situations'],['contacts','#c81e4a','📞','Contacts','Call or edit'],['tips','#d9480f','⚠️','Safety tips',TIPS.length+' topics'],['quiz','#a61e4d','🎓','Life skills','15 new questions daily'],['health','#b91c1c','📍','Nearby health centres','Find clinics and hospitals on the map']];
+  return ['FirstAid',`<div class="hero"><div class="cross">+</div><div><h2>FirstAid</h2><p>Be prepared. Save lives.</p></div></div>
+  ${store.get('profile',{}).role==='Admin'?`<button class="tile" onclick="go('admin')"><i>🛡️</i><div>Admin dashboard<small>View and respond to emergency alerts</small></div></button>`:''}${banner('home')}<button class="alert" onclick="go('sos')"><i>SOS</i><div>Emergency alert<small>Send your location to your contacts</small></div></button>
+  <div class="grid">${g.map((x,i)=>`<button class="gt${i==4?' wide':''}" style="--c:${x[1]}" onclick="go('${x[0]}')"><i>${x[2]}</i><div>${x[3]}<small>${x[4]}</small></div></button>`).join('')}</div>`];
+}
+function guides(){
+  return ['First aid guide',`<p class="mut" style="margin-bottom:10px">Choose a situation. In a life-threatening emergency, call 112 first.</p>`+
+  GUIDES.map((g,i)=>`<button class="tile" onclick="go('guide',${i})"><i style="background:var(--bg)">${g.i}</i><div>${g.t}<small>${g.s.length} steps</small></div></button>`).join('')];
+}
+function guide(){
+  const g=GUIDES[S.arg];
+  return [g.t,`<div class="gh"><i>${g.i}</i><div><h2>${g.t}</h2><p class="mut">${g.s.length} steps. Stay calm and act step by step.</p></div></div><div class="card">${g.s.map((s,i)=>`<div class="step"><span>${i+1}</span><div>${s}</div></div>`).join('')}</div>
+  <button class="btn red block" onclick="location.href='tel:'+mainNum()">Call ${mainNum()} now</button>
+  <p class="warn">This guide supports first response only. It does not replace a doctor or trained first aider.</p>`];
+}
+
+/* ---- SOS ---- */
+let sosTimer=null,sosCancel=false;
+function userContacts(){return store.get('contacts',[])}
+function sos(){
+  const c=userContacts();
+  return ['Emergency alert (SOS)',`<p class="mut" style="text-align:center">Tap to send your GPS location to your saved contacts and school admin.</p>
+  <button class="sosbtn" onclick="startSOS()">SOS</button>
+  <p class="mut" style="text-align:center">${c.length?`${c.length} contact${c.length>1?'s':''} will be alerted.`:'No contacts saved yet. Add contacts first so the alert reaches someone.'}</p>
+  <button class="btn ghost block" style="margin-top:14px" onclick="go('contacts')">Manage contacts</button>`];
+}
+function startSOS(){
+  sosCancel=false;let n=5;const ov=$('#ov');ov.className='show';
+  const draw=()=>ov.innerHTML=`<div class="big">${n}</div><h2 style="margin:10px 0">Sending alert…</h2><p>Getting your location</p><button class="btn" onclick="cancelSOS()">Cancel</button>`;
+  draw();
+  const loc=getLoc();
+  sosTimer=setInterval(async()=>{n--;if(n>0){draw();return}clearInterval(sosTimer);if(sosCancel)return;finishSOS(await loc)},1000);
+}
+function cancelSOS(){sosCancel=true;clearInterval(sosTimer);$('#ov').className=''}
+function getLoc(){return new Promise(res=>{if(!navigator.geolocation)return res(null);navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),()=>res(null),{enableHighAccuracy:true,timeout:8000,maximumAge:10000})})}
+function finishSOS(loc){
+  const who=store.get('me','A student');
+  const where=loc?`Location: https://maps.google.com/?q=${loc.lat},${loc.lng} (${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)})`:'Location unavailable. Please call me.';
+  const msg=`EMERGENCY! ${who} needs help. ${where} Sent from FirstAid app.`;
+  const nums=userContacts().map(c=>c.phone.replace(/[^\d+]/g,'')).filter(Boolean);
+  const log=store.get('alerts',[]);log.unshift({time:new Date().toLocaleString(),loc,sent:nums.length,status:'Sent'});store.set('alerts',log.slice(0,30));DB.saveAlert({name:who,lat:loc?loc.lat:null,lng:loc?loc.lng:null});
+  $('#ov').innerHTML=`<div class="big">✓</div><h2 style="margin:10px 0">Alert ready</h2><p style="margin-bottom:14px">${loc?`${loc.lat.toFixed(4)}° , ${loc.lng.toFixed(4)}°`:'No GPS fix. Message says location unavailable.'}</p>
+  ${nums.length?`<button class="btn" onclick="location.href='sms:${nums.join(',')}?body=${encodeURIComponent(msg)}'">Send by SMS</button>`:'<p>No contacts saved.</p>'}
+  <button class="btn" onclick="window.open('https://wa.me/?text=${encodeURIComponent(msg)}')">Send by WhatsApp</button>
+  <button class="btn" onclick="location.href='tel:'+mainNum()">Call ${mainNum()}</button>
+  <button class="btn" style="background:transparent;color:#fff;border:2px solid #fff" onclick="$('#ov').className='';">Close</button>`;
+}
+
+/* ---- Contacts ---- */
+function contacts(){
+  const c=userContacts();
+  return ['Emergency contacts',`${numsCard()}
+  <div class="card"><h3>Your name</h3><input id="me" placeholder="Name shown in alerts" value="${esc(store.get('me',''))}"><button class="btn block" onclick="store.set('me',$('#me').value.trim()||'A student');this.textContent='Saved'">Save name</button></div>
+  <div class="card"><h3>Alert contacts</h3>${c.length?c.map((x,i)=>`<div class="row" style="padding:8px 0"><div>${esc(x.name)}<div class="mut">${esc(x.phone)}</div></div><button class="btn" onclick="location.href='tel:${esc(x.phone)}'">Call</button><button class="btn ghost" onclick="delC(${i})">✕</button></div>`).join(''):'<p class="mut">None yet. Add parents, a teacher and the school admin.</p>'}
+  <input id="cn" placeholder="Name (e.g. Mum, School admin)"><input id="cp" type="tel" placeholder="Phone number"><button class="btn block" onclick="addC()">Add contact</button></div>`];
+}
+function addC(){const n=$('#cn').value.trim(),p=$('#cp').value.trim();if(!n||p.replace(/\D/g,'').length<7){alert('Enter a name and a valid phone number.');return}const c=userContacts();c.push({name:n,phone:p});store.set('contacts',c);render()}
+function delC(i){const c=userContacts();c.splice(i,1);store.set('contacts',c);render()}
+
+/* ---- More / tips / quiz / health ---- */
+function more(){
+  const pf=store.get('profile',{});const m=[...(pf.role==='Admin'?[['admin','🛡️','Admin dashboard']]:[]),['tips','⚠️','Safety tips'],['quiz','🎓','Life skills quiz'],['health','📍','Nearby health centres'],['alerts','🕒','Alert history']];
+  return ['More',`<div>${m.map(x=>`<button class="tile" onclick="go('${x[0]}')"><i style="background:var(--bg)">${x[1]}</i><div>${x[2]}</div></button>`).join('')}</div><button class="btn ghost block" style="margin-top:6px" onclick="logout()">Sign out (${esc(pf.name||'')})</button>`];
+}
+function tips(){return ['Safety tips',TIPS.map(t=>`<div class="card"><h3>${t.i} ${t.c}</h3><ul style="padding-left:20px">${t.l.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')]}
+function quiz(){
+  const q=S.q,L=q.list||(q.list=daily(S.round||0)),no=(S.round||0)+1;
+  if(q.done){const p=Math.round(q.sc/L.length*100);return ['Daily life skills quiz',`<div class="card" style="text-align:center;padding:24px 16px"><p class="mut">Quiz ${no} complete</p><div style="font-size:56px;font-weight:800;color:var(--head);line-height:1.1">${q.sc}<span style="font-size:26px;color:var(--mut)"> / ${L.length}</span></div><p style="margin:6px 0 2px"><b>You scored ${q.sc} out of ${L.length} (${p}%)</b></p><p class="mut">${p>=80?'Excellent. You can handle everyday challenges.':p>=50?'Good effort. Review the explanations and try again.':'Keep learning. Read the guides and try again.'}</p></div>
+  <p style="text-align:center;margin:14px 0 10px"><b>Would you like to take another quiz?</b></p>
+  <button class="btn block" style="margin-bottom:10px" onclick="another()">Yes, take another quiz</button>
+  <button class="btn ghost block" onclick="go('home')">No, back to home</button>`]}
+  const [t,o,a,w]=L[q.i],bs=store.get('qlog',{})[dayKey()];
+  return ['Daily life skills quiz',`<p class="mut">Quiz ${no} · Question ${q.i+1} of ${L.length}${bs!=null?' · Best today: '+bs:''}</p><div class="bar"><i style="width:${q.i/L.length*100}%"></i></div><h3 style="margin-bottom:12px">${t}</h3>
+  ${o.map((x,i)=>`<button class="opt ${q.pick!=null?(i===a?'ok':i===q.pick?'bad':''):''}" ${q.pick!=null?'disabled':''} onclick="pickA(${i})">${x}</button>`).join('')}
+  ${q.pick!=null?`<div class="card"><b>${q.pick===a?'Correct.':'Not quite.'}</b> ${w}</div><button class="btn block" onclick="nextQ()">${q.i===L.length-1?'See my score':'Next question'}</button>`:''}`];
+}
+function another(){S.round=(S.round||0)+1;S.q={i:0,sc:0,done:false,pick:null,list:daily(S.round)};render();$('#app').scrollTop=0}
+function pickA(i){const q=S.q;q.pick=i;if(i===q.list[q.i][2])q.sc++;render()}
+function nextQ(){const q=S.q;q.pick=null;q.i++;if(q.i>=q.list.length){q.done=true;const l=store.get('qlog',{}),k=dayKey();l[k]=Math.max(l[k]||0,q.sc);store.set('qlog',l)}render();$('#app').scrollTop=0}
+function findNear(q){
+  const w=window.open('about:blank','_blank');
+  getLoc().then(l=>{
+    const u=l?`https://www.google.com/maps/search/${q}/@${l.lat},${l.lng},14z`:`https://www.google.com/maps/search/${q}+near+me`;
+    if(w)w.location=u;else location.href=u;
+  });
+}
+function health(){
+  return ['Nearby health centres',`<p class="mut" style="margin-bottom:12px">Uses your location to search in your maps app. Needs internet.</p>
+  ${[['Hospitals','hospital'],['Clinics','clinic'],['Pharmacies','pharmacy']].map(x=>`<button class="btn block" style="margin-bottom:8px" onclick="findNear('${x[1]}')">Find ${x[0].toLowerCase()} near me</button>`).join('')}`];
+}
+function alerts(){
+  const l=store.get('alerts',[]);
+  return ['Alert history',l.length?l.map(a=>`<div class="card"><b>${a.time}</b><div class="mut">${a.loc?`${a.loc.lat.toFixed(4)}, ${a.loc.lng.toFixed(4)}`:'No GPS fix'} · ${a.sent} contact${a.sent===1?'':'s'}</div></div>`).join(''):'<p class="mut">No alerts sent yet.</p>'];
+}
+function numsCard(){
+  const adm=store.get('profile',{}).role==='Admin',n=(adm&&S.nums)||getNums();
+  if(!adm)return `<div class="card"><h3>Emergency numbers</h3>${n.map(d=>`<div class="row" style="padding:8px 0"><div>${esc(d[0])}<div class="mut">${esc(d[1])}</div></div><button class="btn" onclick="location.href='tel:${esc(d[1])}'">Call</button></div>`).join('')}<p class="mut">Check these match your area’s official numbers.</p></div>`;
+  return `<div class="card"><h3>Emergency numbers (you can edit)</h3><p class="mut" style="margin-bottom:8px">The first number is used for the top phone icon and the Call buttons.</p>${n.map((d,i)=>`<div class="row" style="margin-bottom:6px"><input class="nn" value="${esc(d[0])}" placeholder="Service name" style="margin:0"><input class="np" value="${esc(d[1])}" placeholder="Number" type="tel" style="margin:0;max-width:130px"><button class="btn ghost" onclick="delN(${i})" aria-label="Remove">✕</button></div>`).join('')}<div class="row" style="margin-top:8px"><button class="btn ghost" onclick="addN()">+ Add number</button><button class="btn" onclick="saveN()">Save changes</button></div></div>`;
+}
+function readN(keep){const a=[...document.querySelectorAll('.nn')],b=[...document.querySelectorAll('.np')],l=a.map((x,i)=>[x.value.trim(),b[i].value.trim()]);return keep?l:l.filter(r=>r[0]&&r[1])}
+function addN(){S.nums=[...readN(true),['','']];render()}
+function delN(i){const l=readN(true);l.splice(i,1);S.nums=l;render()}
+function saveN(){
+  const l=readN();
+  if(!l.length)return alert('Keep at least one emergency number.');
+  if(l.some(r=>!/^[+\d][\d\s()+-]{2,}$/.test(r[1])))return alert('Numbers can only contain digits, spaces, + ( ) and -.');
+  store.set('numbers',l);S.nums=null;DB.saveNums(l);render();alert('Emergency numbers saved.');
+}
+
+function login(){
+  const reg=S.reg||!useFB;
+  return ['Welcome',`<div class="card"><h3>${S.reg?'Create account':(useFB?'Sign in':'Get started')}</h3>
+  ${reg?'<input id="ln" placeholder="Your name">':''}
+  ${useFB?'<input id="le" type="email" placeholder="Email"><input id="lp" type="password" placeholder="Password (6+ characters)">':''}
+  ${reg?`<select id="lr" onchange="$('#apw').style.display=this.value==='Admin'?'block':'none'" style="width:100%;padding:12px;border-radius:14px;border:1.5px solid var(--line);margin-bottom:8px;font-size:16px;background:var(--card);color:var(--ink)"><option>Student</option><option>Teacher</option>${!useFB?'<option>Admin</option>':''}</select>${!useFB?'<input id="apw" type="password" placeholder="Admin password" style="display:none">':''}`:''}
+  <button class="btn block" onclick="doLogin()">${S.reg?'Create account':(useFB?'Sign in':'Continue')}</button>
+  ${useFB?`<button class="btn ghost block" style="margin-top:8px" onclick="S.reg=!S.reg;render()">${S.reg?'I already have an account':'Create a new account'}</button>`:'<p class="mut" style="margin-top:10px">Demo mode: nothing is stored online. Paste your Firebase keys into the file to turn on real accounts and a live admin screen.</p>'}
+  <p id="lerr" style="color:#c81428;margin-top:8px"></p></div>`];
+}
+function setProfile(p){store.set('profile',p);store.set('me',p.name);go('home')}
+function logout(){if(useFB&&fbAuth)fbAuth.signOut();store.set('profile',null);S.reg=false;go('login')}
+async function doLogin(){
+  const g=id=>(($('#'+id)||{}).value||''),err=m=>{$('#lerr').textContent=m};
+  try{
+    if(!useFB){const n=g('ln').trim();if(!n)return err('Enter your name.');const role=g('lr')||'Student';if(role==='Admin'&&hashPw(g('apw'))!==ADMIN_HASH)return err('Wrong admin password.');return setProfile({name:n,role})}
+    const e=g('le').trim(),pw=g('lp');if(!e||pw.length<6)return err('Enter your email and a password of 6+ characters.');
+    if(S.reg){const n=g('ln').trim();if(!n)return err('Enter your name.');const role=g('lr')||'Student';
+      const r=await fbAuth.createUserWithEmailAndPassword(e,pw);
+      await fbDb.collection('Users').doc(r.user.uid).set({name:n,email:e,role,emergencyContacts:[]});return setProfile({name:n,role,email:e})}
+    const r=await fbAuth.signInWithEmailAndPassword(e,pw),d=await fbDb.collection('Users').doc(r.user.uid).get(),u=d.data()||{};
+    setProfile({name:u.name||e,role:u.role||'Student',email:e});
+  }catch(x){err(x.message)}
+}
+function admin(){
+  const p=store.get('profile',{});
+  if(p.role!=='Admin')return ['Admin dashboard','<div class="card"><p>Only admin accounts can open this screen.</p></div>'];
+  if(S.err)return ['Admin dashboard',`<div class="card"><p>Could not load alerts: ${esc(S.err)}</p></div>`];
+  const A=S.alerts;if(!A)return ['Admin dashboard','<p class="mut">Loading alerts…</p>'];
+  const c=s=>A.filter(a=>a.status===s).length;
+  const stat=(n,l)=>`<div class="card" style="flex:1;text-align:center;margin:0"><div style="font-size:26px;font-weight:800;color:var(--head)">${n}</div><div class="mut">${l}</div></div>`;
+  return ['Admin dashboard',`<p class="mut" style="margin-bottom:8px">${useFB?'Live from Firebase.':'Demo mode: showing alerts from this device only.'}</p>
+  <div class="row" style="margin-bottom:12px">${stat(c('New'),'New')}${stat(c('Responding'),'Responding')}${stat(c('Resolved'),'Resolved')}</div>`+
+  (A.length?A.map(a=>`<div class="card"><div class="row"><div><b>${esc(a.name||'Unknown')}</b><div class="mut">${new Date(a.time).toLocaleString()}</div></div><span class="pill ${a.status}">${a.status}</span></div>
+  <div style="margin:8px 0">${a.lat!=null?`<a href="https://maps.google.com/?q=${a.lat},${a.lng}" target="_blank" rel="noopener" style="color:var(--head);font-weight:600">View location on map</a>`:'<span class="mut">No GPS location</span>'}</div>
+  <div class="row">${['Responding','Resolved'].map(s=>`<button class="btn ${a.status===s?'':'ghost'}" onclick="setSt('${a.id}','${s}')">${s}</button>`).join('')}</div></div>`).join(''):'<div class="card"><p class="mut">No alerts yet.</p></div>')];
+}
+function setSt(id,s){DB.setStatus(id,s).then(()=>{if(!useFB){S.alerts=store.get('allAlerts',[]);S.lastJ='';render()}}).catch(e=>alert(e.message))}
+
+/* live mode: re-check who is signed in and their real role from the server on every start */
+if(useFB)fbAuth.onAuthStateChanged(async u=>{
+  if(!u){if(store.get('profile',null)){store.set('profile',null)}render();return}
+  try{const x=(await fbDb.collection('Users').doc(u.uid).get()).data();
+    const sn=(await fbDb.collection('Settings').doc('numbers').get()).data();if(sn&&sn.list){store.set('numbers',sn.list.map(o=>[o.name,o.phone]));render()}
+    if(x){const pr=store.get('profile',null),np={name:x.name||u.email,role:x.role||'Student',email:u.email};
+      if(!pr||pr.role!==np.role||pr.name!==np.name){store.set('profile',np);store.set('me',np.name);render()}}}catch(e){}
+});
+render();
+if('serviceWorker' in navigator&&location.protocol!=='file:')addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
