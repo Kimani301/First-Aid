@@ -1,13 +1,15 @@
 {
+  "id": "./",
   "name": "FirstAid",
   "short_name": "FirstAid",
   "description": "First aid guides, emergency contacts and SOS alerts.",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#e11d2e",
+  "prefer_related_applications": false,
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
