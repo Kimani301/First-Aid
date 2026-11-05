@@ -68,6 +68,12 @@ input:focus{outline:2px solid var(--navy2);border-color:transparent}
 .mut{color:var(--mut);font-size:14px}
 .dang{background:#fff1f2;border:2px solid #e11d2e;color:#8f0d1c;border-radius:16px;padding:12px;margin-bottom:12px}
 .prev{width:100%;max-height:280px;object-fit:contain;border-radius:14px;background:#111;display:block}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mb{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 4px;border-radius:14px;background:var(--bg);font-size:13px;font-weight:650;text-align:center;cursor:pointer;color:var(--ink)}
+.mb b{font-size:26px;font-weight:400}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cat{display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 8px;border:0;border-radius:18px;background:var(--card);box-shadow:var(--sh);font-size:15px;font-weight:700;color:var(--ink);text-align:center}
+.cat i{font-style:normal;font-size:32px}
 .opt{display:block;width:100%;text-align:left;margin-bottom:10px;padding:14px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:16px}
 .opt.ok{border-color:var(--green);background:#dff5e8;color:#0d4a27}.opt.bad{border-color:var(--red);background:#fde3e3;color:#7a1414}
 .bar{height:8px;background:var(--line);border-radius:4px;margin:6px 0 16px}.bar i{display:block;height:100%;background:var(--green);border-radius:4px}
@@ -256,7 +262,7 @@ const defaults=[['Ambulance','112'],['Police','999'],['Fire brigade','998']];
 const getNums=()=>store.get('numbers',defaults);
 const mainNum=()=>(getNums()[0]||['','112'])[1];
 const S={route:'home',arg:null,q:{i:0,sc:0,done:false,pick:null}};
-const NAV=[['home','🏠','Home'],['guides','➕','Guides'],['sos','🆘','SOS'],['contacts','📇','Contacts'],['more','⋯','More']];
+const NAV=[['home','🏠','Home'],['guides','➕','Guides'],['sos','🆘','SOS'],['health','🏥','Hospitals'],['more','⋯','More']];
 
 const W='#e11d2e',P='#ffc9cf',R='#fff';
 const BAN={
@@ -271,7 +277,7 @@ alerts:['Your past alerts',`<circle cx="60" cy="50" r="38" fill="${W}"/><path d=
 };
 BAN.admin=['Monitor emergency alerts',BAN.alerts[1]];BAN.scan=['Add a photo or video, then see what to do',BAN.health[1]];BAN.login=['Welcome. Sign in to continue',BAN.home[1]];
 const banner=k=>BAN[k]?`<div class="ban"><b>${BAN[k][0]}</b><svg viewBox="0 0 120 100" aria-hidden="true">${BAN[k][1]}</svg></div>`:'';
-function go(r,a,nopush){S.hist=S.hist||[];if(!nopush&&S.route&&S.route!==r&&S.route!=='login'){S.hist.push({route:S.route,arg:S.arg});history.pushState(null,'')}S.nums=null;if(S.unsub){S.unsub();S.unsub=null}S.route=r;S.arg=a??null;if(r==='admin'){S.alerts=null;S.lastJ='';S.unsub=DB.watch((x,err)=>{const j=JSON.stringify(x)+err;if(j===S.lastJ)return;S.lastJ=j;S.alerts=x;S.err=err;if(S.route==='admin')render()})}if(r==='quiz'){S.round=0;S.q={i:0,sc:0,done:false,pick:null}}if(r==='health')loadHealth();render();$('#app').scrollTop=0}
+function go(r,a,nopush){S.hist=S.hist||[];if(!nopush&&S.route&&S.route!==r&&S.route!=='login'){S.hist.push({route:S.route,arg:S.arg});history.pushState(null,'')}S.nums=null;if(S.unsub){S.unsub();S.unsub=null}S.route=r;S.arg=a??null;if(r==='admin'){S.alerts=null;S.lastJ='';S.unsub=DB.watch((x,err)=>{const j=JSON.stringify(x)+err;if(j===S.lastJ)return;S.lastJ=j;S.alerts=x;S.err=err;if(S.route==='admin')render()})}if(r==='quiz'){S.round=0;S.q={i:0,sc:0,done:false,pick:null}}if(r==='health')loadHealth();if(r==='scan'){S.scanCat=null;S.scanSel=null}render();$('#app').scrollTop=0}
 function doBack(){const p=(S.hist||[]).pop();go(p?p.route:'home',p?p.arg:null,true)}
 function navTo(r){S.hist=[];go(r,null,true)}
 $('#back').onclick=()=>{if((S.hist||[]).length)history.back();else doBack()};
@@ -288,20 +294,30 @@ function render(){
 }
 
 function home(){
-  const g=[['guides','#e11d2e','➕','First aid guide',GUIDES.length+' situations'],['contacts','#c81e4a','📞','Contacts','Call or edit'],['tips','#d9480f','⚠️','Safety tips',TIPS.length+' topics'],['quiz','#a61e4d','🎓','Life skills','15 new questions daily'],['health','#b91c1c','📍','Nearby health centres','Find clinics and hospitals on the map']];
+  const g=[['guides','#e11d2e','➕','First aid guide',GUIDES.length+' situations'],['health','#b91c1c','🏥','Nearby hospitals','Find and go'],['scan','#c81e4a','📷','Check an injury','Photo or video'],['contacts','#d9480f','📞','Contacts','Call or edit'],['tips','#a61e4d','⚠️','Safety tips',TIPS.length+' topics'],['quiz','#7c1d3a','🎓','Life skills','New questions daily']];
   return ['FirstAid',`<div class="hero"><div class="cross">+</div><div><h2>FirstAid</h2><p>Be prepared. Save lives.</p></div></div>
-  ${store.get('profile',{}).role==='Admin'?`<button class="tile" onclick="go('admin')"><i>🛡️</i><div>Admin dashboard<small>View and respond to emergency alerts</small></div></button>`:''}${banner('home')}<button class="tile" onclick="go('scan')"><i>📷</i><div>Check an injury<small>Add a photo or video and see what to do</small></div></button><button class="alert" onclick="go('sos')"><i>SOS</i><div>Emergency alert<small>Send your location to your contacts</small></div></button>
-  <div class="grid">${g.map((x,i)=>`<button class="gt${i==4?' wide':''}" style="--c:${x[1]}" onclick="go('${x[0]}')"><i>${x[2]}</i><div>${x[3]}<small>${x[4]}</small></div></button>`).join('')}</div>`];
+  ${store.get('profile',{}).role==='Admin'?`<button class="tile" onclick="go('admin')"><i>🛡️</i><div>Admin dashboard<small>View and respond to emergency alerts</small></div></button>`:''}${banner('home')}<button class="alert" onclick="go('sos')"><i>SOS</i><div>Emergency alert<small>Send your location to your contacts</small></div></button>
+  <div class="grid">${g.map((x,i)=>`<button class="gt" style="--c:${x[1]}" onclick="go('${x[0]}')"><i>${x[2]}</i><div>${x[3]}<small>${x[4]}</small></div></button>`).join('')}</div>`];
 }
 /* ---- Check an injury: add a photo or video, pick what it looks like, see what to do (offline, nothing is uploaded) ---- */
 const SCANG=[
-['Wounds and bleeding',['Severe bleeding','Cuts and scrapes','Splinter','Bruise','Crush injury','Nosebleed']],
-['Burns and fire',['Burns','Chemical on skin','Fire and smoke','Electric shock','Heat exhaustion']],
-['Bones and head',['Sprain or broken bone','Head injury','Neck or back injury','Tooth knocked out']],
-['Bites and stings',['Snake bite','Scorpion sting','Insect sting','Dog bite','Allergic reaction']],
-['Eyes, ears and nose',['Eye injury','Venom in the eye','Object in nose or ear']],
-['Emergencies',['Choking','Fainting','Seizure','Drowning','Poisoning','Asthma attack','CPR (not breathing)']]
+['Wounds and bleeding','🩹',['Severe bleeding','Cuts and scrapes','Nosebleed','Splinter','Bruise','Crush injury']],
+['Burns and fire','🔥',['Burns','Chemical on skin','Fire and smoke','Electric shock','Heat exhaustion']],
+['Bones and head','🦴',['Sprain or broken bone','Head injury','Neck or back injury','Tooth knocked out']],
+['Bites and stings','🐍',['Snake bite','Scorpion sting','Insect sting','Dog bite','Allergic reaction']],
+['Eyes, ears and nose','👁️',['Eye injury','Venom in the eye','Object in nose or ear']],
+['Emergencies','🚨',['Choking','Fainting','Seizure','Drowning','Poisoning','Asthma attack','CPR (not breathing)']]
 ];
+const SCANL={
+'Severe bleeding':'Blood flowing fast or soaking through cloth','Cuts and scrapes':'Broken skin, grazes, minor bleeding','Nosebleed':'Blood coming from the nose',
+'Splinter':'Small object stuck under the skin','Bruise':'Skin turning blue, purple or dark after a knock','Crush injury':'Finger, hand or foot squashed or trapped',
+'Burns':'Red, blistered or peeling skin after heat','Chemical on skin':'Stinging, red or burning skin after a chemical','Fire and smoke':'Fire nearby, smoke, or clothes alight',
+'Electric shock':'Contact with a live wire or socket','Heat exhaustion':'Very hot, dizzy, heavy sweating or flushed',
+'Sprain or broken bone':'Swollen, painful, odd shape, cannot move it','Head injury':'Bump, cut or bruise on the head','Neck or back injury':'Fall or blow with neck or back pain','Tooth knocked out':'Tooth loose, broken or out',
+'Snake bite':'Bite marks, pain, swelling or bleeding','Scorpion sting':'Sharp burning pain, little swelling','Insect sting':'Red, swollen, itchy bump','Dog bite':'Teeth marks or torn skin from an animal','Allergic reaction':'Hives, itching, swollen lips or face',
+'Eye injury':'Red, watering, painful eye, or something in it','Venom in the eye':'Snake venom sprayed into the eyes','Object in nose or ear':'Something pushed into the nose or ear',
+'Choking':'Cannot cough, speak or breathe','Fainting':'Pale, dizzy or collapsed','Seizure':'Shaking, stiff or not aware','Drowning':'Pulled from water, struggling to breathe','Poisoning':'Swallowed something harmful','Asthma attack':'Wheezing and struggling to breathe','CPR (not breathing)':'Not breathing and not responding'
+};
 const SCANF={
 'Severe bleeding':['Blood is spurting or soaking through the cloth','The person is pale, dizzy, confused or faint','Bleeding does not slow after 10 minutes of firm pressure'],
 'Cuts and scrapes':['The cut is deep, gaping or has something stuck in it','Bleeding will not stop after 10 minutes of pressure','It came from an animal bite or a dirty or rusty object'],
@@ -338,22 +354,30 @@ function pickMedia(inp){const f=inp.files&&inp.files[0];if(!f)return;if(S.media)
 function clearMedia(){if(S.media)URL.revokeObjectURL(S.media.url);S.media=null;render()}
 async function shareMedia(){const f=S.media&&S.media.file;if(!f)return;try{if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:'Injury photo',text:'Sent from the FirstAid app'});else alert('Sharing is not available on this device. Save the photo and send it by WhatsApp or email.')}catch(e){}}
 function scan(){
-  const m=S.media,sel=S.scanSel;
-  const pick=`<div class="card"><h3>1. Add a photo or video</h3><p class="mut" style="margin-bottom:8px">Optional. It stays on your phone and is never uploaded.</p>
-  ${m?`${m.video?`<video class="prev" src="${m.url}" controls playsinline></video>`:`<img class="prev" src="${m.url}" alt="Your photo">`}
-  <div style="display:flex;gap:8px;margin-top:8px"><button class="btn ghost" onclick="shareMedia()">Share with a nurse</button><button class="btn ghost" onclick="clearMedia()">Remove</button></div>`:''}
-  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:${m?10:0}px">
-  <label class="btn" style="cursor:pointer"><input type="file" accept="image/*" capture="environment" hidden onchange="pickMedia(this)">📷 Take photo</label>
-  <label class="btn" style="cursor:pointer"><input type="file" accept="video/*" capture="environment" hidden onchange="pickMedia(this)">🎥 Record video</label>
-  <label class="btn ghost" style="cursor:pointer"><input type="file" accept="image/*,video/*" hidden onchange="pickMedia(this)">🖼️ Choose from gallery</label></div></div>`;
-  const what=`<div class="card"><h3>2. What does it look like?</h3><p class="mut" style="margin-bottom:6px">Compare with your photo and tap the closest match.</p>
-  ${SCANG.map(g=>{const ch=g[1].map(t=>({t,gi:GUIDES.findIndex(x=>x.t===t)})).filter(x=>x.gi>=0);return ch.length?`<div style="font-weight:700;margin:10px 0 6px">${g[0]}</div><div style="display:flex;flex-wrap:wrap;gap:8px">${ch.map(x=>`<button class="btn ${sel===x.gi?'red':'ghost'}" onclick="S.scanSel=${x.gi};render();$('#res')&&$('#res').scrollIntoView({behavior:'smooth'})">${GUIDES[x.gi].i} ${x.t}</button>`).join('')}</div>`:''}).join('')}</div>`;
-  const G=sel!=null?GUIDES[sel]:null,fl=G?(SCANF[G.t]||['The person gets worse, or you are worried']):[];
-  const out=G?`<div id="res"></div><div class="dang"><b>Call ${mainNum()} now if:</b><ul style="margin:6px 0 0 18px">${fl.map(d=>`<li>${d}</li>`).join('')}</ul></div>
-  <div class="card"><h3>3. What to do: ${G.t}</h3>${G.s.map((s,i)=>`<div class="step"><span>${i+1}</span><div>${s}</div></div>`).join('')}</div>
-  <button class="btn red block" onclick="location.href='tel:'+mainNum()">Call ${mainNum()} now</button>
-  <button class="btn ghost block" style="margin-top:8px" onclick="go('guide',${sel})">Open the full guide</button>`:'';
-  return ['Check an injury',pick+what+out+`<p class="warn">This app does not analyse the photo. You choose the closest match, and the steps are first-aid guidance only. It does not replace a doctor or trained first aider.</p>`];
+  const m=S.media,cat=S.scanCat,sel=S.scanSel;
+  const photo=m?`<div class="card"><div class="mut" style="margin-bottom:6px">Your ${m.video?'video':'photo'}</div>${m.video?`<video class="prev" src="${m.url}" controls playsinline></video>`:`<img class="prev" src="${m.url}" alt="Your photo">`}
+    <div style="display:flex;gap:8px;margin-top:8px"><button class="btn ghost" onclick="shareMedia()">Share with a nurse</button><button class="btn ghost" onclick="clearMedia()">Remove</button></div></div>`:'';
+  const back=t=>`<button class="btn ghost" style="margin-bottom:10px" onclick="${t}">← Back</button>`;
+  if(sel!=null){const G=GUIDES[sel],fl=SCANF[G.t]||['The person gets worse, or you are worried'];
+    return [G.t,back("S.scanSel=null;render();$('#app').scrollTop=0")+photo+`<div class="gh"><i>${G.i}</i><div><h2>${G.t}</h2><p class="mut">${SCANL[G.t]||''}</p></div></div>
+    <div class="dang"><b>Call ${mainNum()} now if:</b><ul style="margin:6px 0 0 18px">${fl.map(d=>`<li>${d}</li>`).join('')}</ul></div>
+    <div class="card"><h3>What to do</h3>${G.s.map((s,i)=>`<div class="step"><span>${i+1}</span><div>${s}</div></div>`).join('')}</div>
+    <button class="btn red block" onclick="location.href='tel:'+mainNum()">Call ${mainNum()} now</button>
+    <button class="btn ghost block" style="margin-top:8px" onclick="go('guide',${sel})">Open the full guide</button>
+    <p class="warn">First-aid guidance only. It does not replace a doctor or trained first aider.</p>`]}
+  if(cat!=null){const C=SCANG[cat],rows=C[2].map(t=>({t,gi:GUIDES.findIndex(x=>x.t===t)})).filter(x=>x.gi>=0);
+    return [C[0],back("S.scanCat=null;render();$('#app').scrollTop=0")+photo+`<p class="mut" style="margin-bottom:10px">Tap the one that looks closest to what you see.</p>
+    ${rows.map(x=>`<button class="tile" onclick="S.scanSel=${x.gi};render();$('#app').scrollTop=0"><i style="background:var(--bg)">${GUIDES[x.gi].i}</i><div>${x.t}<small>${SCANL[x.t]||''}</small></div></button>`).join('')}`]}
+  return ['Check an injury',`<div class="card"><h3>📸 Add a photo or video <span class="mut" style="font-weight:400">(optional)</span></h3>
+    <p class="mut" style="margin:4px 0 10px">Keep it beside the steps while you help. It stays on your phone and is never uploaded.</p>
+    ${m?`${m.video?`<video class="prev" src="${m.url}" controls playsinline></video>`:`<img class="prev" src="${m.url}" alt="Your photo">`}<div style="display:flex;gap:8px;margin:8px 0 10px"><button class="btn ghost" onclick="shareMedia()">Share with a nurse</button><button class="btn ghost" onclick="clearMedia()">Remove</button></div>`:''}
+    <div class="mgrid">
+    <label class="mb"><input type="file" accept="image/*" capture="environment" hidden onchange="pickMedia(this)"><b>📷</b>Take photo</label>
+    <label class="mb"><input type="file" accept="video/*" capture="environment" hidden onchange="pickMedia(this)"><b>🎥</b>Record video</label>
+    <label class="mb"><input type="file" accept="image/*,video/*" hidden onchange="pickMedia(this)"><b>🖼️</b>Gallery</label></div></div>
+    <h3 style="margin:14px 2px 10px">What happened?</h3>
+    <div class="cgrid">${SCANG.map((c,i)=>`<button class="cat" onclick="S.scanCat=${i};render();$('#app').scrollTop=0"><i>${c[1]}</i>${c[0]}</button>`).join('')}</div>
+    <p class="warn">The app does not analyse the photo. You choose what it looks like, and the steps are first-aid guidance only.</p>`];
 }
 /* ---- Install screen: shown first to new visitors who opened the link in a browser ---- */
 let DIP=null;
@@ -403,23 +427,32 @@ function startSOS(){
 function cancelSOS(){sosCancel=true;clearInterval(sosTimer);$('#ov').className=''}
 function getLoc(){return new Promise(res=>{if(!navigator.geolocation)return res(null);navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),()=>res(null),{enableHighAccuracy:true,timeout:8000,maximumAge:10000})})}
 function kmBetween(a,b,c,d){const t=x=>x*Math.PI/180,dl=t(c-a),dn=t(d-b),h=Math.sin(dl/2)**2+Math.cos(t(a))*Math.cos(t(c))*Math.sin(dn/2)**2;return 12742*Math.asin(Math.sqrt(h))}
-/* Nearby hospitals from OpenStreetMap (free, no key). Falls back to the last saved list when offline. */
+/* Nearby hospitals from OpenStreetMap (free, no key). Tries 3 servers at once, widens the search, then a second service. */
+const OVP=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];
+function ovQuery(R,loc){
+  const q=`[out:json][timeout:20];nwr["amenity"~"^(hospital|clinic)$"](around:${R},${loc.lat},${loc.lng});out center tags 80;`;
+  const one=async u=>{const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),14000);
+    try{const r=await fetch(u,{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'},signal:ac.signal});
+      if(!r.ok)throw new Error('http '+r.status);const j=await r.json();if(!j.elements)throw new Error('bad');return j.elements}
+    finally{clearTimeout(tm)}};
+  return Promise.any(OVP.map(one));
+}
+function toFac(e,loc){const t=e.tags||{},la=e.lat??(e.center&&e.center.lat),lo=e.lon??(e.center&&e.center.lon);if(la==null||lo==null)return null;
+  const ph=String(t.phone||t['contact:phone']||t['contact:mobile']||'').split(';')[0].replace(/[^\d+]/g,'');
+  return{name:t.name||(t.amenity==='hospital'?'Hospital':'Clinic'),la,lo,ph,km:kmBetween(loc.lat,loc.lng,la,lo),h:t.amenity==='hospital'}}
+async function nominatim(loc){
+  const d=0.35,u=`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=15&bounded=1&viewbox=${loc.lng-d},${loc.lat+d},${loc.lng+d},${loc.lat-d}&q=hospital`;
+  const r=await fetch(u);if(!r.ok)throw new Error('http '+r.status);const a=await r.json();
+  return a.map(x=>({name:x.name||String(x.display_name||'Hospital').split(',')[0],la:+x.lat,lo:+x.lon,ph:'',km:kmBetween(loc.lat,loc.lng,+x.lat,+x.lon),h:true}));
+}
 async function findHospitals(loc){
   if(!loc)return null;
   const key='hosp:'+loc.lat.toFixed(1)+','+loc.lng.toFixed(1);
-  try{
-    const q=`[out:json][timeout:10];nwr["amenity"~"^(hospital|clinic)$"](around:20000,${loc.lat},${loc.lng});out center tags 60;`;
-    const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),9000);
-    const r=await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q),{signal:ac.signal});clearTimeout(tm);
-    if(!r.ok)throw 0;
-    const j=await r.json();
-    const list=j.elements.map(e=>{const t=e.tags||{},la=e.lat??(e.center&&e.center.lat),lo=e.lon??(e.center&&e.center.lon);if(la==null||lo==null)return null;
-      const ph=String(t.phone||t['contact:phone']||'').split(';')[0].replace(/[^\d+]/g,'');
-      return{name:t.name||(t.amenity==='hospital'?'Hospital':'Clinic'),la,lo,ph,km:kmBetween(loc.lat,loc.lng,la,lo),h:t.amenity==='hospital'}}).filter(Boolean)
-      .sort((a,b)=>(a.km-(a.h?3:0))-(b.km-(b.h?3:0))).slice(0,5);
-    if(list.length)store.set(key,list);
-    return list;
-  }catch(e){const old=store.get(key,null);return old&&old.length?old:null}
+  const fin=l=>{l=l.filter((x,i,a)=>a.findIndex(y=>y.name===x.name&&Math.abs(y.la-x.la)<0.0005&&Math.abs(y.lo-x.lo)<0.0005)===i).sort((a,b)=>a.km-b.km).slice(0,6);if(l.length)store.set(key,l);return l};
+  try{let els=await ovQuery(15000,loc);if(!els.length)els=await ovQuery(40000,loc);
+    const l=fin(els.map(e=>toFac(e,loc)).filter(Boolean));if(l.length)return l}catch(e){}
+  try{const l=fin(await nominatim(loc));if(l.length)return l}catch(e){}
+  const old=store.get(key,null);return old&&old.length?old:null;
 }
 function finishSOS(loc,hp){
   const who=store.get('me','A student');
@@ -443,7 +476,7 @@ function finishSOS(loc,hp){
     if(!list||!list.length){el.innerHTML='<p>Could not load the hospital list (needs internet).</p>'+mapBtn;return}
     el.innerHTML=list.map(h=>`<div class="row" style="padding:7px 0"><div>${esc(h.name)}<small>${h.km.toFixed(1)} km away</small></div>
       ${h.ph?`<button class="btn" style="min-width:0;margin:0" onclick="location.href='tel:${h.ph}'">Call</button>`:''}
-      <button class="btn" style="min-width:0;margin:0" onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${h.la},${h.lo}')">Go</button></div>`).join('')+mapBtn;
+      <button class="btn" style="min-width:0;margin:0" onclick="window.open(dirURL(${h.la},${h.lo}),'_blank')">Go</button></div>`).join('')+mapBtn;
   });
 }
 
@@ -460,7 +493,7 @@ function delC(i){const c=userContacts();c.splice(i,1);store.set('contacts',c);re
 
 /* ---- More / tips / quiz / health ---- */
 function more(){
-  const pf=store.get('profile',{});const m=[...(pf.role==='Admin'?[['admin','🛡️','Admin dashboard']]:[]),['scan','📷','Check an injury'],['tips','⚠️','Safety tips'],['quiz','🎓','Life skills quiz'],['health','📍','Nearby health centres'],['alerts','🕒','Alert history']];
+  const pf=store.get('profile',{});const m=[...(pf.role==='Admin'?[['admin','🛡️','Admin dashboard']]:[]),['contacts','📇','My contacts'],['scan','📷','Check an injury'],['tips','⚠️','Safety tips'],['quiz','🎓','Life skills quiz'],['alerts','🕒','Alert history']];
   return ['More',`<div>${m.map(x=>`<button class="tile" onclick="go('${x[0]}')"><i style="background:var(--bg)">${x[1]}</i><div>${x[2]}</div></button>`).join('')}</div><button class="btn ghost block" style="margin-top:6px" onclick="logout()">Sign out (${esc(pf.name||'')})</button>`];
 }
 function tips(){return ['Safety tips',TIPS.map(t=>`<div class="card"><h3>${t.i} ${t.c}</h3><ul style="padding-left:20px">${t.l.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')]}
@@ -478,7 +511,7 @@ function quiz(){
 function another(){S.round=(S.round||0)+1;S.q={i:0,sc:0,done:false,pick:null,list:daily(S.round)};render();$('#app').scrollTop=0}
 function pickA(i){const q=S.q;q.pick=i;if(i===q.list[q.i][2])q.sc++;render()}
 function nextQ(){const q=S.q;q.pick=null;q.i++;if(q.i>=q.list.length){q.done=true;const l=store.get('qlog',{}),k=dayKey();l[k]=Math.max(l[k]||0,q.sc);store.set('qlog',l)}render();$('#app').scrollTop=0}
-const dirURL=(la,lo)=>`https://www.google.com/maps/dir/?api=1&destination=${la},${lo}&travelmode=driving`;
+const dirURL=(la,lo)=>`https://www.google.com/maps/dir/?api=1&destination=${la},${lo}&travelmode=driving&dir_action=navigate`;
 function findNear(q){
   const l0=S.hl&&S.hl.loc,mk=l=>l?`https://www.google.com/maps/search/${q}/@${l.lat},${l.lng},14z`:`https://www.google.com/maps/search/${q}+near+me`;
   if(l0){window.open(mk(l0),'_blank');return}
@@ -496,10 +529,10 @@ function health(){
   let body;
   if(h.st==='load')body=`<div class="card"><p>📍 ${h.loc?'Finding health facilities near you…':'Getting your location…'}</p></div>`;
   else if(h.st==='noloc')body=`<div class="card"><p>We could not get your location. Turn on location for this app, then try again.</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
-  else if(!h.list.length)body=`<div class="card"><p>Could not load the list. It needs internet. Use Google Maps below.</p></div>`;
+  else if(!h.list.length)body=`<div class="card"><p>Could not reach the map servers. Check your internet, then try again, or use Google Maps below.</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
   else{const n=[...h.list].sort((a,b)=>a.km-b.km)[0];
-    body=`<button class="btn red block" style="font-size:17px;padding:16px" onclick="window.open(dirURL(${n.la},${n.lo}),'_blank')">🧭 Take me to the nearest: ${esc(n.name)} (${n.km.toFixed(1)} km)</button>
-    <div class="card" style="margin-top:12px">${h.list.map(x=>`<div class="row" style="padding:8px 0"><div>${esc(x.name)}<div class="mut">${x.km.toFixed(1)} km away</div></div>${x.ph?`<button class="btn ghost" onclick="location.href='tel:${x.ph}'">Call</button>`:''}<button class="btn" onclick="window.open(dirURL(${x.la},${x.lo}),'_blank')">Directions</button></div>`).join('')}</div>`}
+    body=`<button class="btn red block" style="font-size:17px;padding:16px" onclick="window.open(dirURL(${n.la},${n.lo}),'_blank')">🧭 Go to the nearest: ${esc(n.name)} (${n.km.toFixed(1)} km)</button>
+    <div class="card" style="margin-top:12px">${h.list.map(x=>`<div class="row" style="padding:8px 0"><div>${esc(x.name)}<div class="mut">${x.km.toFixed(1)} km away</div></div>${x.ph?`<button class="btn ghost" onclick="location.href='tel:${x.ph}'">Call</button>`:''}<button class="btn" onclick="window.open(dirURL(${x.la},${x.lo}),'_blank')">Go</button></div>`).join('')}</div>`}
   return ['Nearby health centres',body+maps+(h.st!=='load'?'<button class="btn ghost block" style="margin-top:10px" onclick="loadHealth();render()">Refresh</button>':'')+'<p class="warn">In an emergency call '+mainNum()+' first.</p>'];
 }
 
