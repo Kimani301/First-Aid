@@ -66,11 +66,19 @@ input:focus{outline:2px solid var(--navy2);border-color:transparent}
 .step span{flex:none;width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
 .warn{background:#fff4d6;color:#6a4b00;border-radius:14px;padding:12px;font-size:14px;margin:12px 0}
 .mut{color:var(--mut);font-size:14px}
+.dang{background:#fff1f2;border:2px solid #e11d2e;color:#8f0d1c;border-radius:16px;padding:12px;margin-bottom:12px}
+.prev{width:100%;max-height:280px;object-fit:contain;border-radius:14px;background:#111;display:block}
 .opt{display:block;width:100%;text-align:left;margin-bottom:10px;padding:14px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:16px}
 .opt.ok{border-color:var(--green);background:#dff5e8;color:#0d4a27}.opt.bad{border-color:var(--red);background:#fde3e3;color:#7a1414}
 .bar{height:8px;background:var(--line);border-radius:4px;margin:6px 0 16px}.bar i{display:block;height:100%;background:var(--green);border-radius:4px}
 #ov{position:fixed;inset:0;background:linear-gradient(160deg,#f0364a,#a30d1c);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;z-index:9}
 #ov.show{display:flex}
+#ov.res{justify-content:flex-start;overflow-y:auto;padding:24px 16px}
+#ov .sc{background:rgba(255,255,255,.15);border-radius:18px;padding:12px;margin:12px 0;width:100%;max-width:440px;text-align:left}
+#ov .sc h3{margin:0 0 6px;font-size:16px}
+#ov .sc small{display:block;opacity:.85}
+#ov .sc .btn{width:100%}
+#ov .sc .row .btn{width:auto}
 #ov .big{font-size:96px;font-weight:800;line-height:1}
 #ov .btn{background:#fff;color:var(--red);margin-top:10px;min-width:200px}
 a{color:inherit}
@@ -163,7 +171,17 @@ const GUIDES=[
 {t:'Diarrhoea and dehydration',i:'💧',s:['Give small, frequent sips of ORS or clean water.','Home ORS: 6 level teaspoons sugar and half a teaspoon salt in 1 litre of clean water.','Keep feeding normally.','Go to a clinic if there is blood, high fever, or they cannot drink.']},
 {t:'Allergic reaction',i:'🤧',s:['Move away from the trigger.','For mild itching or rash, use an antihistamine as advised.','If the face or throat swells or breathing is hard, call 112 now.','Lay them flat and use an adrenaline pen if one is available.']},
 {t:'Dog bite',i:'🐕',s:['Wash the wound with soap and running water for 10 minutes.','Cover with a clean dressing.','Go to a clinic the same day for rabies and tetanus protection.','Note the dog and where it lives.']},
-{t:'Fever',i:'🌡️',s:['Rest, drink plenty of fluids and wear light clothing.','Give paracetamol as the label directs.','Sponge with lukewarm water if very hot.','Get tested for malaria if in a risk area. See a doctor if fever lasts over 2 days or comes with fits, stiff neck or rash.']}
+{t:'Fever',i:'🌡️',s:['Rest, drink plenty of fluids and wear light clothing.','Give paracetamol as the label directs.','Sponge with lukewarm water if very hot.','Get tested for malaria if in a risk area. See a doctor if fever lasts over 2 days or comes with fits, stiff neck or rash.']},
+{t:'Scorpion sting',i:'🦂',s:['Keep the person calm and still.','Wash the sting with soap and clean water.','Apply a cold pack wrapped in cloth for 10 minutes.','Do not cut the sting, suck it or tie anything tight around the limb.','Go to a clinic or hospital, especially for a child, or if numbness, drooling, twitching or trouble breathing appear.']},
+{t:'Venom in the eye',i:'🐍',s:['Do not rub the eye.','Rinse the eye straight away with plenty of clean water for at least 15 minutes. Tilt the head so the water runs away from the other eye.','Keep the eye open while rinsing, as far as the person can.','Cover loosely with a clean cloth.','Go to a hospital urgently, even if the pain eases.']},
+{t:'Tooth knocked out',i:'🦷',s:['Find the tooth and hold it by the crown (the white part), not the root.','If it is dirty, rinse it briefly with milk or clean water. Do not scrub it.','For an adult tooth, keep it in a cup of milk. Do not put a baby tooth back.','Press a clean cloth on the gum to stop bleeding.','See a dentist within an hour if you can.']},
+{t:'Splinter',i:'🪡',s:['Wash your hands and the skin around the splinter.','Clean tweezers with alcohol or boiling water, then pull the splinter out in the direction it went in.','Wash the area again and cover it if needed.','Do not dig at it with a needle if it is deep.','See a clinic if it is deep, stays in, or the skin turns red, swollen or has pus.']},
+{t:'Bruise',i:'🟣',s:['Rest the injured part.','Hold a cold pack wrapped in cloth on it for 15 minutes, several times a day.','Raise the limb if you can.','Watch for severe pain, swelling or being unable to use the limb, which can mean a broken bone.']},
+{t:'Crush injury',i:'🖐️',s:['Free the hand or foot if it is safe to do so.','Remove rings, watches or shoes quickly before swelling starts.','Apply a cold pack wrapped in cloth for 15 minutes and raise the limb.','Cover any wound with a clean dressing and press gently if it bleeds.','Get medical help if it is deformed, very swollen, numb or the person cannot move it.']},
+{t:'Neck or back injury',i:'🧍',s:['Do not move the person unless they are in immediate danger, such as fire or water.','Call 112 or ask someone else to.','Tell them to stay still. Hold their head and neck gently in the position you found them.','Do not let them sit up, stand or walk.','If they stop breathing, start CPR and get help.']},
+{t:'Chemical on skin',i:'🧪',s:['Wear gloves or use a cloth to protect your own skin.','Take off any clothing the chemical touched.','Rinse the skin with running water for at least 20 minutes.','Do not try to neutralise it with another chemical.','Cover loosely with a clean cloth and get medical help.']},
+{t:'Fire and smoke',i:'🚒',s:['Get out immediately. Do not collect belongings.','Stay low under the smoke and keep doors closed behind you.','If clothes are on fire: stop, drop to the ground and roll.','Never use a lift. Meet at the assembly point.','Call 112 from outside. Never go back in.']},
+{t:'Object in nose or ear',i:'👂',s:['Do not poke or try to dig it out with tweezers or cotton buds.','For the nose, ask the person to breathe through the mouth and gently blow out of the other nostril.','For the ear, tilt the head so the ear faces down and let it fall out.','Go to a clinic if it does not come out easily.','A button battery or magnet is an emergency. Go to hospital at once.']}
 ];
 const TIPS=[
 {c:'Accident prevention',i:'🚸',l:['Walk, do not run, on stairs and in corridors.','Wipe up spills and report broken furniture.','Keep bags and shoes out of walkways.','Do not push or play rough near stairs and doors.','Tell a teacher about anything dangerous you see.']},
@@ -251,7 +269,7 @@ quiz:['Solve everyday problems',`<path d="M60 20 108 40 60 60 12 40z" fill="${W}
 health:['Find care near you',`<ellipse cx="60" cy="90" rx="24" ry="5" fill="${P}"/><path d="M60 8a28 28 0 0 1 28 28c0 22-28 52-28 52S32 58 32 36A28 28 0 0 1 60 8z" fill="${W}"/><rect x="55" y="24" width="10" height="26" rx="2" fill="${R}"/><rect x="47" y="32" width="26" height="10" rx="2" fill="${R}"/>`],
 alerts:['Your past alerts',`<circle cx="60" cy="50" r="38" fill="${W}"/><path d="M60 26v26l18 10" stroke="${R}" stroke-width="6" fill="none" stroke-linecap="round"/>`]
 };
-BAN.admin=['Monitor emergency alerts',BAN.alerts[1]];BAN.login=['Welcome. Sign in to continue',BAN.home[1]];
+BAN.admin=['Monitor emergency alerts',BAN.alerts[1]];BAN.scan=['Add a photo or video, then see what to do',BAN.health[1]];BAN.login=['Welcome. Sign in to continue',BAN.home[1]];
 const banner=k=>BAN[k]?`<div class="ban"><b>${BAN[k][0]}</b><svg viewBox="0 0 120 100" aria-hidden="true">${BAN[k][1]}</svg></div>`:'';
 function go(r,a,nopush){S.hist=S.hist||[];if(!nopush&&S.route&&S.route!==r&&S.route!=='login'){S.hist.push({route:S.route,arg:S.arg});history.pushState(null,'')}S.nums=null;if(S.unsub){S.unsub();S.unsub=null}S.route=r;S.arg=a??null;if(r==='admin'){S.alerts=null;S.lastJ='';S.unsub=DB.watch((x,err)=>{const j=JSON.stringify(x)+err;if(j===S.lastJ)return;S.lastJ=j;S.alerts=x;S.err=err;if(S.route==='admin')render()})}if(r==='quiz'){S.round=0;S.q={i:0,sc:0,done:false,pick:null}}render();$('#app').scrollTop=0}
 function doBack(){const p=(S.hist||[]).pop();go(p?p.route:'home',p?p.arg:null,true)}
@@ -265,15 +283,77 @@ function render(){
   $('#back').hidden=r==='home'||r==='login';
   $('#nav').innerHTML=NAV.map(n=>`<button class="${n[0]===r||(r==='guide'&&n[0]==='guides')?'on':''}${n[0]==='sos'?' sosn':''}" onclick="navTo('${n[0]}')"><b>${n[1]}</b>${n[2]}</button>`).join('');
   if(r==='login')$('#nav').innerHTML='';
-  const V={home,guides,guide,sos,contacts,more,tips,quiz,health,alerts,login,admin};
+  const V={home,guides,guide,scan,sos,contacts,more,tips,quiz,health,alerts,login,admin};
   const o=V[r]();$('#ttl').textContent=o[0];A.innerHTML=(r==='home'?'':banner(r))+o[1];
 }
 
 function home(){
   const g=[['guides','#e11d2e','➕','First aid guide',GUIDES.length+' situations'],['contacts','#c81e4a','📞','Contacts','Call or edit'],['tips','#d9480f','⚠️','Safety tips',TIPS.length+' topics'],['quiz','#a61e4d','🎓','Life skills','15 new questions daily'],['health','#b91c1c','📍','Nearby health centres','Find clinics and hospitals on the map']];
   return ['FirstAid',`<div class="hero"><div class="cross">+</div><div><h2>FirstAid</h2><p>Be prepared. Save lives.</p></div></div>
-  ${store.get('profile',{}).role==='Admin'?`<button class="tile" onclick="go('admin')"><i>🛡️</i><div>Admin dashboard<small>View and respond to emergency alerts</small></div></button>`:''}${banner('home')}<button class="alert" onclick="go('sos')"><i>SOS</i><div>Emergency alert<small>Send your location to your contacts</small></div></button>
+  ${store.get('profile',{}).role==='Admin'?`<button class="tile" onclick="go('admin')"><i>🛡️</i><div>Admin dashboard<small>View and respond to emergency alerts</small></div></button>`:''}${banner('home')}<button class="tile" onclick="go('scan')"><i>📷</i><div>Check an injury<small>Add a photo or video and see what to do</small></div></button><button class="alert" onclick="go('sos')"><i>SOS</i><div>Emergency alert<small>Send your location to your contacts</small></div></button>
   <div class="grid">${g.map((x,i)=>`<button class="gt${i==4?' wide':''}" style="--c:${x[1]}" onclick="go('${x[0]}')"><i>${x[2]}</i><div>${x[3]}<small>${x[4]}</small></div></button>`).join('')}</div>`];
+}
+/* ---- Check an injury: add a photo or video, pick what it looks like, see what to do (offline, nothing is uploaded) ---- */
+const SCANG=[
+['Wounds and bleeding',['Severe bleeding','Cuts and scrapes','Splinter','Bruise','Crush injury','Nosebleed']],
+['Burns and fire',['Burns','Chemical on skin','Fire and smoke','Electric shock','Heat exhaustion']],
+['Bones and head',['Sprain or broken bone','Head injury','Neck or back injury','Tooth knocked out']],
+['Bites and stings',['Snake bite','Scorpion sting','Insect sting','Dog bite','Allergic reaction']],
+['Eyes, ears and nose',['Eye injury','Venom in the eye','Object in nose or ear']],
+['Emergencies',['Choking','Fainting','Seizure','Drowning','Poisoning','Asthma attack','CPR (not breathing)']]
+];
+const SCANF={
+'Severe bleeding':['Blood is spurting or soaking through the cloth','The person is pale, dizzy, confused or faint','Bleeding does not slow after 10 minutes of firm pressure'],
+'Cuts and scrapes':['The cut is deep, gaping or has something stuck in it','Bleeding will not stop after 10 minutes of pressure','It came from an animal bite or a dirty or rusty object'],
+'Splinter':['It is deep, or you cannot remove it','It is in or near the eye','The skin turns red, swollen or has pus, or the person has a fever'],
+'Bruise':['It followed a blow to the head','There is severe pain, or the limb cannot be used','A large bruise appears for no reason, or the belly hurts and the person feels dizzy'],
+'Crush injury':['The limb is deformed or heavily crushed','It is bleeding heavily, or numb, blue or cold','A limb is trapped under something heavy for more than a few minutes'],
+'Nosebleed':['It lasts more than 20 minutes','It followed a blow to the head','The bleeding is very heavy'],
+'Burns':['The burn is bigger than the person\u2019s palm','It is on the face, hands, feet, joints or private parts','It is a chemical or electrical burn, or the skin looks white or charred','The person is a baby or young child'],
+'Chemical on skin':['A large area of skin is affected','The chemical is in the eyes, or was swallowed','The person has trouble breathing or the skin looks burned'],
+'Fire and smoke':['Anyone is trapped or missing','Anyone is burned or coughing from smoke','The fire is spreading'],
+'Electric shock':['Every electric shock needs a medical check, even if the person feels fine','The person is unconscious, or their heartbeat or breathing seems wrong','There are burns on the skin'],
+'Heat exhaustion':['The person is confused or very drowsy','The skin is hot and dry, or they have stopped sweating','They have fainted, or cannot keep down fluids'],
+'Sprain or broken bone':['A bone is showing or the limb looks bent out of shape','The person cannot move it or put weight on it','The area below the injury is numb, blue or cold','The head, neck or back may be injured'],
+'Head injury':['The person was unconscious, even briefly','Vomiting, confusion, a seizure or a worsening headache','Clear fluid or blood from the nose or ears'],
+'Neck or back injury':['Always call for help. Do not move the person.'],
+'Tooth knocked out':['The mouth keeps bleeding','There was also a blow to the head, or the person is drowsy','The jaw may be broken, or the tooth may have been swallowed or breathed in'],
+'Snake bite':['Every snake bite needs a hospital. Go now.'],
+'Scorpion sting':['The person is a baby or young child','Numbness spreads, or there is drooling, twitching, sweating or trouble breathing','The pain is severe and does not ease'],
+'Insect sting':['The face, lips or throat is swelling','Breathing is hard or the person feels dizzy','There are hives over the body, or many stings'],
+'Dog bite':['The wound is deep or bleeding heavily','The animal was a stray, wild or unvaccinated one. Go to hospital the same day for rabies advice','The bite is on the face, neck or hands, or it looks infected'],
+'Allergic reaction':['The face, lips, tongue or throat is swelling','Breathing is hard, or the voice sounds hoarse','Dizziness, fainting, or hives over the whole body'],
+'Eye injury':['A chemical got in the eye','Something is stuck in the eye','Vision is lost or blurred, or the pain is severe'],
+'Venom in the eye':['Every case needs a hospital. Rinse first, then go now.'],
+'Object in nose or ear':['It is a button battery or a magnet','The person has trouble breathing, or there is bleeding or pus','There is severe pain or dizziness'],
+'Choking':['The person cannot cough, speak or breathe','They go blue, floppy or unconscious','The object does not clear after a few rounds of back blows and thrusts'],
+'Fainting':['They do not wake within 1 minute','They are injured, pregnant, or have chest pain','They keep fainting'],
+'Seizure':['It lasts more than 5 minutes, or one follows another','It is the first seizure, or the person is injured','They do not wake up, or have trouble breathing afterwards'],
+'Drowning':['Every drowning case needs hospital, even if the person seems fine'],
+'Poisoning':['Every poisoning needs urgent help. Call now.'],
+'Asthma attack':['There is no improvement in 10 minutes','The person cannot speak a full sentence','Lips look blue, or they become exhausted or drowsy'],
+'CPR (not breathing)':['Always call first, then start CPR.']
+};
+function pickMedia(inp){const f=inp.files&&inp.files[0];if(!f)return;if(S.media)URL.revokeObjectURL(S.media.url);S.media={url:URL.createObjectURL(f),video:(f.type||'').startsWith('video'),file:f};render()}
+function clearMedia(){if(S.media)URL.revokeObjectURL(S.media.url);S.media=null;render()}
+async function shareMedia(){const f=S.media&&S.media.file;if(!f)return;try{if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:'Injury photo',text:'Sent from the FirstAid app'});else alert('Sharing is not available on this device. Save the photo and send it by WhatsApp or email.')}catch(e){}}
+function scan(){
+  const m=S.media,sel=S.scanSel;
+  const pick=`<div class="card"><h3>1. Add a photo or video</h3><p class="mut" style="margin-bottom:8px">Optional. It stays on your phone and is never uploaded.</p>
+  ${m?`${m.video?`<video class="prev" src="${m.url}" controls playsinline></video>`:`<img class="prev" src="${m.url}" alt="Your photo">`}
+  <div style="display:flex;gap:8px;margin-top:8px"><button class="btn ghost" onclick="shareMedia()">Share with a nurse</button><button class="btn ghost" onclick="clearMedia()">Remove</button></div>`:''}
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:${m?10:0}px">
+  <label class="btn" style="cursor:pointer"><input type="file" accept="image/*" capture="environment" hidden onchange="pickMedia(this)">📷 Take photo</label>
+  <label class="btn" style="cursor:pointer"><input type="file" accept="video/*" capture="environment" hidden onchange="pickMedia(this)">🎥 Record video</label>
+  <label class="btn ghost" style="cursor:pointer"><input type="file" accept="image/*,video/*" hidden onchange="pickMedia(this)">🖼️ Choose from gallery</label></div></div>`;
+  const what=`<div class="card"><h3>2. What does it look like?</h3><p class="mut" style="margin-bottom:6px">Compare with your photo and tap the closest match.</p>
+  ${SCANG.map(g=>{const ch=g[1].map(t=>({t,gi:GUIDES.findIndex(x=>x.t===t)})).filter(x=>x.gi>=0);return ch.length?`<div style="font-weight:700;margin:10px 0 6px">${g[0]}</div><div style="display:flex;flex-wrap:wrap;gap:8px">${ch.map(x=>`<button class="btn ${sel===x.gi?'red':'ghost'}" onclick="S.scanSel=${x.gi};render();$('#res')&&$('#res').scrollIntoView({behavior:'smooth'})">${GUIDES[x.gi].i} ${x.t}</button>`).join('')}</div>`:''}).join('')}</div>`;
+  const G=sel!=null?GUIDES[sel]:null,fl=G?(SCANF[G.t]||['The person gets worse, or you are worried']):[];
+  const out=G?`<div id="res"></div><div class="dang"><b>Call ${mainNum()} now if:</b><ul style="margin:6px 0 0 18px">${fl.map(d=>`<li>${d}</li>`).join('')}</ul></div>
+  <div class="card"><h3>3. What to do: ${G.t}</h3>${G.s.map((s,i)=>`<div class="step"><span>${i+1}</span><div>${s}</div></div>`).join('')}</div>
+  <button class="btn red block" onclick="location.href='tel:'+mainNum()">Call ${mainNum()} now</button>
+  <button class="btn ghost block" style="margin-top:8px" onclick="go('guide',${sel})">Open the full guide</button>`:'';
+  return ['Check an injury',pick+what+out+`<p class="warn">This app does not analyse the photo. You choose the closest match, and the steps are first-aid guidance only. It does not replace a doctor or trained first aider.</p>`];
 }
 function guides(){
   return ['First aid guide',`<p class="mut" style="margin-bottom:10px">Choose a situation. In a life-threatening emergency, call 112 first.</p>`+
@@ -291,31 +371,64 @@ let sosTimer=null,sosCancel=false;
 function userContacts(){return store.get('contacts',[])}
 function sos(){
   const c=userContacts();
-  return ['Emergency alert (SOS)',`<p class="mut" style="text-align:center">Tap to send your GPS location to your saved contacts and school admin.</p>
+  return ['Emergency alert (SOS)',`<p class="mut" style="text-align:center">Tap to send your GPS location and see your contacts and the nearest hospitals.</p>
   <button class="sosbtn" onclick="startSOS()">SOS</button>
   <p class="mut" style="text-align:center">${c.length?`${c.length} contact${c.length>1?'s':''} will be alerted.`:'No contacts saved yet. Add contacts first so the alert reaches someone.'}</p>
   <button class="btn ghost block" style="margin-top:14px" onclick="go('contacts')">Manage contacts</button>`];
 }
 function startSOS(){
-  sosCancel=false;let n=5;const ov=$('#ov');ov.className='show';
+  sosCancel=false;let n=3;const ov=$('#ov');ov.className='show';
   const draw=()=>ov.innerHTML=`<div class="big">${n}</div><h2 style="margin:10px 0">Sending alert…</h2><p>Getting your location</p><button class="btn" onclick="cancelSOS()">Cancel</button>`;
   draw();
   const loc=getLoc();
-  sosTimer=setInterval(async()=>{n--;if(n>0){draw();return}clearInterval(sosTimer);if(sosCancel)return;finishSOS(await loc)},1000);
+  const hp=loc.then(findHospitals);
+  sosTimer=setInterval(async()=>{n--;if(n>0){draw();return}clearInterval(sosTimer);if(sosCancel)return;finishSOS(await loc,hp)},1000);
 }
 function cancelSOS(){sosCancel=true;clearInterval(sosTimer);$('#ov').className=''}
 function getLoc(){return new Promise(res=>{if(!navigator.geolocation)return res(null);navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),()=>res(null),{enableHighAccuracy:true,timeout:8000,maximumAge:10000})})}
-function finishSOS(loc){
+function kmBetween(a,b,c,d){const t=x=>x*Math.PI/180,dl=t(c-a),dn=t(d-b),h=Math.sin(dl/2)**2+Math.cos(t(a))*Math.cos(t(c))*Math.sin(dn/2)**2;return 12742*Math.asin(Math.sqrt(h))}
+/* Nearby hospitals from OpenStreetMap (free, no key). Falls back to the last saved list when offline. */
+async function findHospitals(loc){
+  if(!loc)return null;
+  const key='hosp:'+loc.lat.toFixed(1)+','+loc.lng.toFixed(1);
+  try{
+    const q=`[out:json][timeout:10];nwr["amenity"~"^(hospital|clinic)$"](around:20000,${loc.lat},${loc.lng});out center tags 60;`;
+    const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),9000);
+    const r=await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q),{signal:ac.signal});clearTimeout(tm);
+    if(!r.ok)throw 0;
+    const j=await r.json();
+    const list=j.elements.map(e=>{const t=e.tags||{},la=e.lat??(e.center&&e.center.lat),lo=e.lon??(e.center&&e.center.lon);if(la==null||lo==null)return null;
+      const ph=String(t.phone||t['contact:phone']||'').split(';')[0].replace(/[^\d+]/g,'');
+      return{name:t.name||(t.amenity==='hospital'?'Hospital':'Clinic'),la,lo,ph,km:kmBetween(loc.lat,loc.lng,la,lo),h:t.amenity==='hospital'}}).filter(Boolean)
+      .sort((a,b)=>(a.km-(a.h?3:0))-(b.km-(b.h?3:0))).slice(0,5);
+    if(list.length)store.set(key,list);
+    return list;
+  }catch(e){const old=store.get(key,null);return old&&old.length?old:null}
+}
+function finishSOS(loc,hp){
   const who=store.get('me','A student');
   const where=loc?`Location: https://maps.google.com/?q=${loc.lat},${loc.lng} (${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)})`:'Location unavailable. Please call me.';
   const msg=`EMERGENCY! ${who} needs help. ${where} Sent from FirstAid app.`;
-  const nums=userContacts().map(c=>c.phone.replace(/[^\d+]/g,'')).filter(Boolean);
+  const cs=userContacts().map(c=>({name:c.name,ph:String(c.phone).replace(/[^\d+]/g,'')})).filter(c=>c.ph);
+  const nums=cs.map(c=>c.ph);
   const log=store.get('alerts',[]);log.unshift({time:new Date().toLocaleString(),loc,sent:nums.length,status:'Sent'});store.set('alerts',log.slice(0,30));DB.saveAlert({name:who,lat:loc?loc.lat:null,lng:loc?loc.lng:null});
-  $('#ov').innerHTML=`<div class="big">✓</div><h2 style="margin:10px 0">Alert ready</h2><p style="margin-bottom:14px">${loc?`${loc.lat.toFixed(4)}° , ${loc.lng.toFixed(4)}°`:'No GPS fix. Message says location unavailable.'}</p>
-  ${nums.length?`<button class="btn" onclick="location.href='sms:${nums.join(',')}?body=${encodeURIComponent(msg)}'">Send by SMS</button>`:'<p>No contacts saved.</p>'}
-  <button class="btn" onclick="window.open('https://wa.me/?text=${encodeURIComponent(msg)}')">Send by WhatsApp</button>
-  <button class="btn" onclick="location.href='tel:'+mainNum()">Call ${mainNum()}</button>
-  <button class="btn" style="background:transparent;color:#fff;border:2px solid #fff" onclick="$('#ov').className='';">Close</button>`;
+  const ov=$('#ov');ov.className='show res';
+  ov.innerHTML=`<div style="font-size:54px;line-height:1">✓</div><h2 style="margin:6px 0">Alert ready</h2>
+  <p style="margin-bottom:10px">${loc?`Your location: ${loc.lat.toFixed(4)}°, ${loc.lng.toFixed(4)}°`:'No GPS fix. Message says location unavailable.'}</p>
+  <button class="btn" style="font-size:18px;padding:14px 20px" onclick="location.href='tel:'+mainNum()">📞 Call ${mainNum()}</button>
+  <div class="sc"><h3>Your emergency contacts</h3>${cs.length?cs.map(c=>`<div class="row" style="padding:6px 0"><div>${esc(c.name)}<small>${esc(c.ph)}</small></div><button class="btn" style="min-width:0;margin:0" onclick="location.href='tel:${c.ph}'">Call</button></div>`).join('')
+    +`<button class="btn" onclick="location.href='sms:${nums.join(',')}?body=${encodeURIComponent(msg)}'">Send location by SMS to all</button>`:'<p>No contacts saved yet. Add some under Contacts.</p>'}
+  <button class="btn" onclick="window.open('https://wa.me/?text=${encodeURIComponent(msg)}')">Send by WhatsApp</button></div>
+  <div class="sc"><h3>Nearest hospitals</h3><div id="sosH"><p>${loc?'Finding hospitals near you…':'Turn on location to see nearby hospitals.'}</p></div></div>
+  <button class="btn" style="background:transparent;color:#fff;border:2px solid #fff" onclick="$('#ov').className=''">Close</button>`;
+  if(!loc)return;
+  const mapBtn=`<button class="btn" onclick="findNear('hospital')">Search hospitals in Maps</button>`;
+  (hp||Promise.resolve(null)).then(list=>{const el=$('#sosH');if(!el)return;
+    if(!list||!list.length){el.innerHTML='<p>Could not load the hospital list (needs internet).</p>'+mapBtn;return}
+    el.innerHTML=list.map(h=>`<div class="row" style="padding:7px 0"><div>${esc(h.name)}<small>${h.km.toFixed(1)} km away</small></div>
+      ${h.ph?`<button class="btn" style="min-width:0;margin:0" onclick="location.href='tel:${h.ph}'">Call</button>`:''}
+      <button class="btn" style="min-width:0;margin:0" onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${h.la},${h.lo}')">Go</button></div>`).join('')+mapBtn;
+  });
 }
 
 /* ---- Contacts ---- */
@@ -331,7 +444,7 @@ function delC(i){const c=userContacts();c.splice(i,1);store.set('contacts',c);re
 
 /* ---- More / tips / quiz / health ---- */
 function more(){
-  const pf=store.get('profile',{});const m=[...(pf.role==='Admin'?[['admin','🛡️','Admin dashboard']]:[]),['tips','⚠️','Safety tips'],['quiz','🎓','Life skills quiz'],['health','📍','Nearby health centres'],['alerts','🕒','Alert history']];
+  const pf=store.get('profile',{});const m=[...(pf.role==='Admin'?[['admin','🛡️','Admin dashboard']]:[]),['scan','📷','Check an injury'],['tips','⚠️','Safety tips'],['quiz','🎓','Life skills quiz'],['health','📍','Nearby health centres'],['alerts','🕒','Alert history']];
   return ['More',`<div>${m.map(x=>`<button class="tile" onclick="go('${x[0]}')"><i style="background:var(--bg)">${x[1]}</i><div>${x[2]}</div></button>`).join('')}</div><button class="btn ghost block" style="margin-top:6px" onclick="logout()">Sign out (${esc(pf.name||'')})</button>`];
 }
 function tips(){return ['Safety tips',TIPS.map(t=>`<div class="card"><h3>${t.i} ${t.c}</h3><ul style="padding-left:20px">${t.l.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')]}
