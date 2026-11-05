@@ -271,19 +271,19 @@ alerts:['Your past alerts',`<circle cx="60" cy="50" r="38" fill="${W}"/><path d=
 };
 BAN.admin=['Monitor emergency alerts',BAN.alerts[1]];BAN.scan=['Add a photo or video, then see what to do',BAN.health[1]];BAN.login=['Welcome. Sign in to continue',BAN.home[1]];
 const banner=k=>BAN[k]?`<div class="ban"><b>${BAN[k][0]}</b><svg viewBox="0 0 120 100" aria-hidden="true">${BAN[k][1]}</svg></div>`:'';
-function go(r,a,nopush){S.hist=S.hist||[];if(!nopush&&S.route&&S.route!==r&&S.route!=='login'){S.hist.push({route:S.route,arg:S.arg});history.pushState(null,'')}S.nums=null;if(S.unsub){S.unsub();S.unsub=null}S.route=r;S.arg=a??null;if(r==='admin'){S.alerts=null;S.lastJ='';S.unsub=DB.watch((x,err)=>{const j=JSON.stringify(x)+err;if(j===S.lastJ)return;S.lastJ=j;S.alerts=x;S.err=err;if(S.route==='admin')render()})}if(r==='quiz'){S.round=0;S.q={i:0,sc:0,done:false,pick:null}}render();$('#app').scrollTop=0}
+function go(r,a,nopush){S.hist=S.hist||[];if(!nopush&&S.route&&S.route!==r&&S.route!=='login'){S.hist.push({route:S.route,arg:S.arg});history.pushState(null,'')}S.nums=null;if(S.unsub){S.unsub();S.unsub=null}S.route=r;S.arg=a??null;if(r==='admin'){S.alerts=null;S.lastJ='';S.unsub=DB.watch((x,err)=>{const j=JSON.stringify(x)+err;if(j===S.lastJ)return;S.lastJ=j;S.alerts=x;S.err=err;if(S.route==='admin')render()})}if(r==='quiz'){S.round=0;S.q={i:0,sc:0,done:false,pick:null}}if(r==='health')loadHealth();render();$('#app').scrollTop=0}
 function doBack(){const p=(S.hist||[]).pop();go(p?p.route:'home',p?p.arg:null,true)}
 function navTo(r){S.hist=[];go(r,null,true)}
 $('#back').onclick=()=>{if((S.hist||[]).length)history.back();else doBack()};
 window.addEventListener('popstate',()=>{if(S.route!=='home'&&S.route!=='login')doBack()});
 
 function render(){
-  if(!store.get('profile',null)&&S.route!=='login')S.route='login';
+  if(!store.get('profile',null)&&S.route!=='login'&&S.route!=='install')S.route=(!isInstalled()&&!store.get('skipInstall',false))?'install':'login';
   const r=S.route,A=$('#app');
-  $('#back').hidden=r==='home'||r==='login';
+  $('#back').hidden=r==='home'||r==='login'||r==='install';
   $('#nav').innerHTML=NAV.map(n=>`<button class="${n[0]===r||(r==='guide'&&n[0]==='guides')?'on':''}${n[0]==='sos'?' sosn':''}" onclick="navTo('${n[0]}')"><b>${n[1]}</b>${n[2]}</button>`).join('');
-  if(r==='login')$('#nav').innerHTML='';
-  const V={home,guides,guide,scan,sos,contacts,more,tips,quiz,health,alerts,login,admin};
+  if(r==='login'||r==='install')$('#nav').innerHTML='';
+  const V={home,guides,guide,scan,install,sos,contacts,more,tips,quiz,health,alerts,login,admin};
   const o=V[r]();$('#ttl').textContent=o[0];A.innerHTML=(r==='home'?'':banner(r))+o[1];
 }
 
@@ -354,6 +354,22 @@ function scan(){
   <button class="btn red block" onclick="location.href='tel:'+mainNum()">Call ${mainNum()} now</button>
   <button class="btn ghost block" style="margin-top:8px" onclick="go('guide',${sel})">Open the full guide</button>`:'';
   return ['Check an injury',pick+what+out+`<p class="warn">This app does not analyse the photo. You choose the closest match, and the steps are first-aid guidance only. It does not replace a doctor or trained first aider.</p>`];
+}
+/* ---- Install screen: shown first to new visitors who opened the link in a browser ---- */
+let DIP=null;
+const isInstalled=()=>(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();DIP=e;if(S.route==='install')render()});
+addEventListener('appinstalled',()=>{DIP=null;S.installed=true;if(S.route==='install')render()});
+async function doInstall(){if(!DIP)return;DIP.prompt();try{const r=await DIP.userChoice;if(r.outcome==='accepted')S.installed=true}catch(e){}DIP=null;render()}
+function skipInstall(){store.set('skipInstall',true);S.route='login';render()}
+function install(){
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  const how=S.installed?`<div class="card"><h3>✅ FirstAid is installed</h3><p>Open <b>FirstAid</b> from your home screen or Start menu, then create your account.</p></div>`
+  :DIP?`<button class="btn red block" style="font-size:18px;padding:16px" onclick="doInstall()">⬇️ Install the app</button>`
+  :`<div class="card"><h3>How to install</h3>${ios?'<p>1. Open this page in <b>Safari</b>.<br>2. Tap the <b>Share</b> button.<br>3. Tap <b>Add to Home Screen</b>.</p>'
+    :'<p><b>Android (Chrome):</b> tap <b>⋮</b>, then <b>Install app</b>.<br><b>Windows (Chrome or Edge):</b> click the install icon at the right of the address bar.</p>'}<p class="mut" style="margin-top:6px">Don\u2019t see it? Open this link in Chrome or Edge, not inside WhatsApp or Facebook.</p></div>`;
+  return ['Welcome',`<div style="text-align:center;padding:18px 4px 8px"><div class="cross" style="margin:0 auto 10px">+</div><h2 style="margin:0">FirstAid</h2><p class="mut" style="margin:6px 0 16px">Install the app first so the guides work even without internet. Then create your account.</p></div>
+  ${how}<button class="btn ghost block" style="margin-top:10px" onclick="skipInstall()">${S.installed?'Continue to create an account':'Continue in the browser instead'}</button>`];
 }
 function guides(){
   return ['First aid guide',`<p class="mut" style="margin-bottom:10px">Choose a situation. In a life-threatening emergency, call 112 first.</p>`+
@@ -462,17 +478,31 @@ function quiz(){
 function another(){S.round=(S.round||0)+1;S.q={i:0,sc:0,done:false,pick:null,list:daily(S.round)};render();$('#app').scrollTop=0}
 function pickA(i){const q=S.q;q.pick=i;if(i===q.list[q.i][2])q.sc++;render()}
 function nextQ(){const q=S.q;q.pick=null;q.i++;if(q.i>=q.list.length){q.done=true;const l=store.get('qlog',{}),k=dayKey();l[k]=Math.max(l[k]||0,q.sc);store.set('qlog',l)}render();$('#app').scrollTop=0}
+const dirURL=(la,lo)=>`https://www.google.com/maps/dir/?api=1&destination=${la},${lo}&travelmode=driving`;
 function findNear(q){
+  const l0=S.hl&&S.hl.loc,mk=l=>l?`https://www.google.com/maps/search/${q}/@${l.lat},${l.lng},14z`:`https://www.google.com/maps/search/${q}+near+me`;
+  if(l0){window.open(mk(l0),'_blank');return}
   const w=window.open('about:blank','_blank');
-  getLoc().then(l=>{
-    const u=l?`https://www.google.com/maps/search/${q}/@${l.lat},${l.lng},14z`:`https://www.google.com/maps/search/${q}+near+me`;
-    if(w)w.location=u;else location.href=u;
-  });
+  getLoc().then(l=>{const u=mk(l);if(w)w.location=u;else location.href=u});
+}
+function loadHealth(){
+  S.hl={st:'load'};
+  getLoc().then(l=>{if(!l){S.hl={st:'noloc'};return}S.hl={st:'load',loc:l};if(S.route==='health')render();return findHospitals(l).then(list=>{S.hl={st:'ok',loc:l,list:list||[]}})})
+    .catch(()=>{S.hl={st:'noloc'}}).then(()=>{if(S.route==='health')render()});
 }
 function health(){
-  return ['Nearby health centres',`<p class="mut" style="margin-bottom:12px">Uses your location to search in your maps app. Needs internet.</p>
-  ${[['Hospitals','hospital'],['Clinics','clinic'],['Pharmacies','pharmacy']].map(x=>`<button class="btn block" style="margin-bottom:8px" onclick="findNear('${x[1]}')">Find ${x[0].toLowerCase()} near me</button>`).join('')}`];
+  const h=S.hl||{st:'load'};
+  const maps=`<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"><button class="btn ghost" onclick="findNear('hospital')">🏥 Hospitals in Maps</button><button class="btn ghost" onclick="findNear('clinic')">⚕️ Clinics in Maps</button><button class="btn ghost" onclick="findNear('pharmacy')">💊 Pharmacies in Maps</button></div>`;
+  let body;
+  if(h.st==='load')body=`<div class="card"><p>📍 ${h.loc?'Finding health facilities near you…':'Getting your location…'}</p></div>`;
+  else if(h.st==='noloc')body=`<div class="card"><p>We could not get your location. Turn on location for this app, then try again.</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
+  else if(!h.list.length)body=`<div class="card"><p>Could not load the list. It needs internet. Use Google Maps below.</p></div>`;
+  else{const n=[...h.list].sort((a,b)=>a.km-b.km)[0];
+    body=`<button class="btn red block" style="font-size:17px;padding:16px" onclick="window.open(dirURL(${n.la},${n.lo}),'_blank')">🧭 Take me to the nearest: ${esc(n.name)} (${n.km.toFixed(1)} km)</button>
+    <div class="card" style="margin-top:12px">${h.list.map(x=>`<div class="row" style="padding:8px 0"><div>${esc(x.name)}<div class="mut">${x.km.toFixed(1)} km away</div></div>${x.ph?`<button class="btn ghost" onclick="location.href='tel:${x.ph}'">Call</button>`:''}<button class="btn" onclick="window.open(dirURL(${x.la},${x.lo}),'_blank')">Directions</button></div>`).join('')}</div>`}
+  return ['Nearby health centres',body+maps+(h.st!=='load'?'<button class="btn ghost block" style="margin-top:10px" onclick="loadHealth();render()">Refresh</button>':'')+'<p class="warn">In an emergency call '+mainNum()+' first.</p>'];
 }
+
 function alerts(){
   const l=store.get('alerts',[]);
   return ['Alert history',l.length?l.map(a=>`<div class="card"><b>${a.time}</b><div class="mut">${a.loc?`${a.loc.lat.toFixed(4)}, ${a.loc.lng.toFixed(4)}`:'No GPS fix'} · ${a.sent} contact${a.sent===1?'':'s'}</div></div>`).join(''):'<p class="mut">No alerts sent yet.</p>'];
