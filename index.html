@@ -278,7 +278,7 @@ $('#back').onclick=()=>{if((S.hist||[]).length)history.back();else doBack()};
 window.addEventListener('popstate',()=>{if(S.route!=='home'&&S.route!=='login')doBack()});
 
 function render(){
-  if(!store.get('profile',null)&&S.route!=='login'&&S.route!=='install')S.route=(!isInstalled()&&!store.get('skipInstall',false))?'install':'login';
+  if(!isInstalled()&&!S.skipped)S.route='install';else if(!store.get('profile',null)&&S.route!=='login')S.route='login';
   const r=S.route,A=$('#app');
   $('#back').hidden=r==='home'||r==='login'||r==='install';
   $('#nav').innerHTML=NAV.map(n=>`<button class="${n[0]===r||(r==='guide'&&n[0]==='guides')?'on':''}${n[0]==='sos'?' sosn':''}" onclick="navTo('${n[0]}')"><b>${n[1]}</b>${n[2]}</button>`).join('');
@@ -361,7 +361,7 @@ const isInstalled=()=>(window.matchMedia&&matchMedia('(display-mode: standalone)
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();DIP=e;if(S.route==='install')render()});
 addEventListener('appinstalled',()=>{DIP=null;S.installed=true;if(S.route==='install')render()});
 async function doInstall(){if(!DIP)return;DIP.prompt();try{const r=await DIP.userChoice;if(r.outcome==='accepted')S.installed=true}catch(e){}DIP=null;render()}
-function skipInstall(){store.set('skipInstall',true);S.route='login';render()}
+function skipInstall(){S.skipped=true;S.route=store.get('profile',null)?'home':'login';render()}
 function install(){
   const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
   const how=S.installed?`<div class="card"><h3>✅ FirstAid is installed</h3><p>Open <b>FirstAid</b> from your home screen or Start menu, then create your account.</p></div>`
@@ -369,7 +369,7 @@ function install(){
   :`<div class="card"><h3>How to install</h3>${ios?'<p>1. Open this page in <b>Safari</b>.<br>2. Tap the <b>Share</b> button.<br>3. Tap <b>Add to Home Screen</b>.</p>'
     :'<p><b>Android (Chrome):</b> tap <b>⋮</b>, then <b>Install app</b>.<br><b>Windows (Chrome or Edge):</b> click the install icon at the right of the address bar.</p>'}<p class="mut" style="margin-top:6px">Don\u2019t see it? Open this link in Chrome or Edge, not inside WhatsApp or Facebook.</p></div>`;
   return ['Welcome',`<div style="text-align:center;padding:18px 4px 8px"><div class="cross" style="margin:0 auto 10px">+</div><h2 style="margin:0">FirstAid</h2><p class="mut" style="margin:6px 0 16px">Install the app first so the guides work even without internet. Then create your account.</p></div>
-  ${how}<button class="btn ghost block" style="margin-top:10px" onclick="skipInstall()">${S.installed?'Continue to create an account':'Continue in the browser instead'}</button>`];
+  ${how}<button class="btn ghost block" style="margin-top:10px" onclick="skipInstall()">${S.installed?'Continue to create an account':'Continue in the browser instead'}</button><p class="mut" style="text-align:center;margin-top:12px">Already installed? Open FirstAid from your home screen or Start menu.</p>`];
 }
 function guides(){
   return ['First aid guide',`<p class="mut" style="margin-bottom:10px">Choose a situation. In a life-threatening emergency, call 112 first.</p>`+

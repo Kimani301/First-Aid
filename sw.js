@@ -1,5 +1,5 @@
 // Bump VERSION whenever you change index.html so users get the update.
-const VERSION = 'firstaid-v7';
+const VERSION = 'firstaid-v8';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png',
