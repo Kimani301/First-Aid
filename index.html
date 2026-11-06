@@ -416,18 +416,18 @@ function scan(){
     <p class="warn">Ask First Aid (AI) can look at a photo when you are online. You can also choose what it looks like. This is first-aid guidance only, not a diagnosis.</p>`];
 }
 /* ---- Ask First Aid: free AI chat (Firebase AI Logic + Gemini free tier). Needs internet; offline it shows the app guides ---- */
-const AI_MODELS=['gemini-2.5-flash','gemini-2.5-flash-lite'],AI_VER='11.10.0';
+const AI_MODELS=['gemini-3.5-flash-lite','gemini-3.1-flash-lite','gemini-3.5-flash'],AI_VER='11.10.0';
 const AI_SYS="You are Ask First Aid, a caring, knowledgeable first-aid and health-safety assistant inside the FirstAid school app in Kenya. The emergency number is 112. Answer every question about first aid, injuries, illness, hygiene, health and safety fully and helpfully, like an experienced first aider talking to a student or teacher. Use simple words and clear Markdown: short paragraphs, numbered steps for what to do, bullet points, and **bold** for warnings. Say clearly when to call 112 or go to hospital. For medicines, say to follow the label or ask a pharmacist and never give exact doses for children. Politely decline topics unrelated to health and safety. Reply in the language the person writes in (English or Kiswahili).";
 const AI_BASE='https://firebasevertexai.googleapis.com/v1beta/projects/'+FB.projectId+'/models/';
 async function aiRest(model,contents){
   const r=await fetch(AI_BASE+model+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':FB.apiKey,'x-goog-api-client':'firebase-js/'+AI_VER+' fire/'+AI_VER},
-    body:JSON.stringify({contents,systemInstruction:{parts:[{text:AI_SYS}]},generationConfig:{maxOutputTokens:2048,temperature:.5},safetySettings:[{category:'HARM_CATEGORY_DANGEROUS_CONTENT',threshold:'BLOCK_ONLY_HIGH'}]})});
+    body:JSON.stringify({contents,systemInstruction:{parts:[{text:AI_SYS}]},generationConfig:{maxOutputTokens:2048},safetySettings:[{category:'HARM_CATEGORY_DANGEROUS_CONTENT',threshold:'BLOCK_ONLY_HIGH'}]})});
   const j=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error(r.status+' '+((j.error&&((j.error.status||'')+': '+j.error.message))||r.statusText));
   const c=j.candidates&&j.candidates[0],t=c&&c.content&&c.content.parts?c.content.parts.map(x=>x.text||'').join(''):'';
   if(!t)throw new Error('SAFETY blocked '+((j.promptFeedback&&j.promptFeedback.blockReason)||(c&&c.finishReason)||'empty'));
   return t}
-async function aiRun(contents){let last;for(const n of AI_MODELS){try{return await aiRest(n,contents)}catch(e){last=e;if(!/404|NOT_FOUND|not found|no longer available|deprecated/i.test(String((e&&e.message)||e)))throw e}}throw last}
+async function aiRun(contents){let last;for(const n of AI_MODELS){try{return await aiRest(n,contents)}catch(e){last=e;if(!/404|NOT_FOUND|not found|no longer available|deprecated|retired|429|RESOURCE_EXHAUSTED|update your code/i.test(String((e&&e.message)||e)))throw e}}throw last}
 const askAI=parts=>aiRun([{role:'user',parts:(Array.isArray(parts)?parts:[parts]).map(x=>typeof x==='string'?{text:x}:x)}]);
 const chatAI=(hist,q)=>aiRun([...hist,{role:'user',parts:[{text:q}]}]);
 function aiErr(e){const m=String((e&&e.message)||e||'');
