@@ -432,7 +432,11 @@ const askAI=parts=>aiRun([{role:'user',parts:(Array.isArray(parts)?parts:[parts]
 const chatAI=(hist,q)=>aiRun([...hist,{role:'user',parts:[{text:q}]}]);
 function aiErr(e){const m=String((e&&e.message)||e||'');
   if(/Failed to fetch|NetworkError|Load failed|network/i.test(m))return{t:'Could not reach the AI service. Check your internet connection and tap Try again.',d:m};
-  if(/PERMISSION_DENIED|403|has not been used|not been enabled|API key not valid|API_KEY/i.test(m))return{t:'Ask First Aid is not switched on yet. (Admin: Firebase console > Build > AI Logic > Get started > Gemini Developer API.)',d:m};
+  if(/PERMISSION_DENIED|403|has not been used|not been enabled|API key not valid|API_KEY/i.test(m)){
+    if(/referer|referrer/i.test(m))return{t:'Your API key does not allow this website. In Google Cloud Console > APIs and Services > Credentials, open the browser key and add your GitHub Pages address (like https://yourname.github.io/*) under Website restrictions, or choose None.',d:m};
+    if(/App Check|appcheck/i.test(m))return{t:'Firebase App Check is blocking the AI. In the Firebase console open App Check > APIs and set Firebase AI Logic to Unenforced (or set up App Check).',d:m};
+    if(/blocked|SERVICE_BLOCKED|restrict/i.test(m))return{t:'Your Firebase API key is blocking the AI. In Google Cloud Console > APIs and Services > Credentials, open the browser key. Under API restrictions choose Dont restrict key, or add Firebase AI Logic API to the list.',d:m};
+    return{t:'Ask First Aid is not switched on for this Firebase project yet. In the Firebase console open Build > AI Logic > Get started, choose Gemini Developer API, then wait 2 to 5 minutes and try again.',d:m}}
   if(/429|quota|RESOURCE_EXHAUSTED/i.test(m))return{t:'Ask First Aid is very busy right now (the free limit was reached). Please try again in a minute.',d:m};
   if(/SAFETY|blocked|PROHIBITED/i.test(m))return{t:'I could not answer that one. Please ask it in a different way. If it is urgent, call '+mainNum()+'.',d:m};
   return{t:'Ask First Aid could not answer. Check your internet and tap Try again.',d:m}}
