@@ -111,6 +111,30 @@ nav{width:640px;max-width:100%;margin:6px auto 14px}
 .hospital-map-legend span{display:flex;align-items:center;gap:5px}
 .hospital-map-legend i{display:inline-block;width:10px;height:10px;border-radius:50%}
 @media(min-width:800px){#hospitalMap{height:560px}}
+/* Full-screen hospital view */
+#hospitalView{display:none;position:fixed;inset:0;z-index:1000;background:#fff;overflow-y:auto;color:#241216;padding-bottom:env(safe-area-inset-bottom,0px)}
+#hospitalView.open{display:block}
+.hv-top{position:sticky;top:0;z-index:1002;background:#8f0d1c;color:#fff;display:flex;align-items:center;gap:12px;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;box-shadow:0 3px 12px #0003}
+.hv-top button{border:0;background:#ffffff22;color:white;border-radius:12px;padding:9px 13px;font-size:15px;font-weight:700}
+.hv-top strong{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hospitalFullMap{height:62vh;min-height:360px;width:100%;background:#d9e0e5}
+.hv-content{padding:16px;max-width:900px;margin:auto}
+.hv-meta{color:#70545a;font-size:14px;margin:4px 0 14px}
+.hv-tabs{display:flex;gap:8px;position:sticky;top:58px;background:#fff;padding:8px 0;z-index:5}
+.hv-tabs button{flex:1;border:1px solid #f0cdd1;background:#fff5f5;color:#8f0d1c;border-radius:12px;padding:12px 8px;font-weight:750}
+.hv-tabs button.active{background:#8f0d1c;color:#fff;border-color:#8f0d1c}
+.hv-photo{width:100%;height:230px;object-fit:cover;border-radius:16px;background:#f4e7e8;display:block}
+.hv-photo-placeholder{min-height:190px;border-radius:16px;background:linear-gradient(135deg,#fbe8ea,#f5d4d8);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#8f0d1c;text-align:center;padding:20px}
+.hv-photo-placeholder .ico{font-size:48px}
+.hv-photo-link{display:inline-block;margin-top:12px;background:#8f0d1c;color:#fff;text-decoration:none;padding:12px 16px;border-radius:12px;font-weight:700}
+.hv-service{padding:12px 0;border-bottom:1px solid #f2dfe1;display:flex;gap:10px;align-items:flex-start}
+.hv-service:last-child{border-bottom:0}
+.hv-service i{font-style:normal;font-size:20px}
+.hv-note{background:#fff5dc;color:#684900;border-radius:12px;padding:12px;font-size:13px;margin-top:12px}
+.leaflet-tile{image-rendering:auto}
+.leaflet-control-attribution{font-size:10px!important}
+@media(min-width:800px){#hospitalFullMap{height:68vh;min-height:480px}.hv-content{padding:22px}}
+
 .hospital-photo{width:100%;height:150px;object-fit:cover;border-radius:15px;display:block;margin-bottom:12px}
 .hospital-item{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .hospital-item:last-child{border-bottom:0}.hospital-pin{width:46px;height:46px;border-radius:14px;background:#ffe3e6;display:grid;place-items:center;font-size:25px;flex:none}
@@ -665,11 +689,15 @@ function ovQuery(R,loc){
 }
 function toFac(e,loc){const t=e.tags||{},la=e.lat??(e.center&&e.center.lat),lo=e.lon??(e.center&&e.center.lon);if(la==null||lo==null)return null;
   const ph=String(t.phone||t['contact:phone']||t['contact:mobile']||'').split(';')[0].replace(/[^\d+]/g,'');
-  return{name:t.name||(t.amenity==='hospital'?'Hospital':'Clinic'),la,lo,ph,km:kmBetween(loc.lat,loc.lng,la,lo),h:t.amenity==='hospital'}}
+  const rawImg=t.image||t.photo||'';
+  const commons=t.wikimedia_commons||'';
+  const specs=String(t['healthcare:speciality']||t['healthcare:specialty']||t['medical:specialty']||t.speciality||'').split(/[;,|]/).map(v=>v.trim()).filter(Boolean);
+  const services=String(t.healthcare||t['healthcare:facility']||'').split(/[;,|]/).map(v=>v.trim()).filter(Boolean);
+  return{name:t.name||(t.amenity==='hospital'?'Hospital':'Clinic'),la,lo,ph,km:kmBetween(loc.lat,loc.lng,la,lo),h:t.amenity==='hospital',image:rawImg,commons,website:t.website||t['contact:website']||'',operator:t.operator||'',services:[...new Set([...specs,...services])],emergency:t.emergency||''}}
 async function nominatim(loc){
   const d=0.35,u=`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=15&bounded=1&viewbox=${loc.lng-d},${loc.lat+d},${loc.lng+d},${loc.lat-d}&q=hospital`;
   const r=await fetch(u);if(!r.ok)throw new Error('http '+r.status);const a=await r.json();
-  return a.map(x=>({name:x.name||String(x.display_name||'Hospital').split(',')[0],la:+x.lat,lo:+x.lon,ph:'',km:kmBetween(loc.lat,loc.lng,+x.lat,+x.lon),h:true}));
+  return a.map(x=>({name:x.name||String(x.display_name||'Hospital').split(',')[0],la:+x.lat,lo:+x.lon,ph:'',km:kmBetween(loc.lat,loc.lng,+x.lat,+x.lon),h:true,image:'',commons:'',services:[]}));
 }
 async function findHospitals(loc){
   if(!loc)return null;
@@ -753,34 +781,58 @@ function health(){
   if(h.st==='load')body=`<div class="card"><p>📍 ${h.loc?'Finding health facilities near you…':'Getting your location…'}</p><p class="mut" style="margin-top:6px">Nearby facilities will appear on the map.</p></div>`;
   else if(h.st==='noloc')body=`<div class="card"><p>We could not get your location. Allow location access for this app, then try again.</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
   else if(!h.list.length)body=`<div class="card"><p>No nearby hospitals were returned. Check your internet connection or try again.</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
-  else{const n=[...h.list].sort((a,b)=>a.km-b.km)[0];body=`<div class="card"><h3>Hospitals and clinics near you</h3><p class="mut">Satellite imagery with nearby facilities marked on the map. Select a marker or facility to view it.</p><div class="hospital-map-wrap"><div class="hospital-map-head"><b>📍 Live location map</b><span>Satellite view</span></div><div id="hospitalMap" aria-label="Satellite map showing your location and nearby hospitals"></div><div class="hospital-map-legend"><span><i style="background:#2563eb"></i>Your location</span><span><i style="background:#dc2626"></i>Hospitals</span><span><i style="background:#0d9488"></i>Clinics</span></div><p class="map-note">Satellite imagery © Esri, Maxar, Earthstar Geographics and GIS User Community. Imagery is not live video and may not be up to date.</p></div></div><button class="btn red block" style="font-size:17px;padding:16px;margin:0 0 12px" onclick="window.open(dirURL(${n.la},${n.lo}),'_blank')">🧭 GO to nearest: ${esc(n.name)}</button><div class="card"><h3>Nearby facilities</h3>${h.list.map((x,i)=>`<div class="hospital-item"><div class="hospital-pin">${x.h?'🏥':'⚕️'}</div><div style="flex:1;min-width:0"><b>${esc(x.name)}</b><div class="mut">${x.km.toFixed(1)} km away · ${x.h?'Hospital':'Clinic'}</div></div>${x.ph?`<button class="btn ghost" onclick="location.href='tel:${x.ph}'">Call</button>`:''}<button class="btn ghost" onclick="focusHospital(${i})">View</button><button class="btn red" onclick="window.open(dirURL(${x.la},${x.lo}),'_blank')">GO</button></div>`).join('')}</div>`;}
+  else{const n=[...h.list].sort((a,b)=>a.km-b.km)[0];body=`<div class="card"><h3>Hospitals and clinics near you</h3><p class="mut">Clear satellite map. Tap a facility and choose View for its full-screen map, photos and services.</p><div class="hospital-map-wrap"><div id="hospitalMap" aria-label="Satellite map showing your location and nearby hospitals"></div><div class="hospital-map-legend"><span><i style="background:#2563eb"></i>Your location</span><span><i style="background:#dc2626"></i>Hospitals</span><span><i style="background:#0d9488"></i>Clinics</span></div><p class="map-note">Satellite imagery is supplied by Esri. Image clarity and age depend on the available satellite coverage; it is not live video.</p></div></div><button class="btn red block" style="font-size:17px;padding:16px;margin:0 0 12px" onclick="window.open(dirURL(${n.la},${n.lo}),'_blank')">🧭 GO to nearest: ${esc(n.name)}</button><div class="card"><h3>Nearby facilities</h3>${h.list.map((x,i)=>`<div class="hospital-item"><div class="hospital-pin">${x.h?'🏥':'⚕️'}</div><div style="flex:1;min-width:0"><b>${esc(x.name)}</b><div class="mut">${x.km.toFixed(1)} km away · ${x.h?'Hospital':'Clinic'}</div></div>${x.ph?`<button class="btn ghost" onclick="location.href='tel:${x.ph}'">Call</button>`:''}<button class="btn ghost" onclick="openHospitalView(${i})">View</button><button class="btn red" onclick="window.open(dirURL(${x.la},${x.lo}),'_blank')">GO</button></div>`).join('')}</div>`;}
   return ['Nearby hospitals',body+(h.st!=='load'?'<button class="btn ghost block" style="margin-top:10px" onclick="loadHealth();render()">Refresh nearby facilities</button>':'')+'<p class="warn">For a life-threatening emergency, seek urgent in-person help immediately.</p>'];
 }
-let hospitalMap=null,hospitalMarkers=[];
+let hospitalMap=null,hospitalMarkers=[],hospitalFullMap=null,selectedHospitalIndex=0;
+function makeHospitalMap(map,loc,list,zoom=14,selected=-1){
+  const satellite=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:19,attribution:'Tiles © Esri, Maxar, Earthstar Geographics'});
+  const labels=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,opacity:.95,attribution:'Labels © Esri'});
+  satellite.addTo(map);labels.addTo(map);
+  const you=L.divIcon({className:'',html:'<div class="user-map-dot"></div>',iconSize:[20,20],iconAnchor:[10,10]});
+  L.marker([loc.lat,loc.lng],{icon:you,zIndexOffset:1000}).addTo(map).bindPopup('<b>Your current location</b>');
+  const bounds=L.latLngBounds([[loc.lat,loc.lng]]);const markers=[];
+  list.forEach((x,i)=>{
+    const color=x.h?'#dc2626':'#0d9488';
+    const ico=L.divIcon({className:'',html:`<div style="width:30px;height:30px;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};box-shadow:0 2px 7px #3338;display:grid;place-items:center"><span style="transform:rotate(45deg);font-size:14px;color:white">${x.h?'H':'C'}</span></div>`,iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-28]});
+    const m=L.marker([x.la,x.lo],{icon:ico}).addTo(map).bindPopup(`<b>${esc(x.name)}</b><br>${x.km.toFixed(1)} km away<br><a class="map-go" href="${dirURL(x.la,x.lo)}" target="_blank" rel="noopener">GO · Get directions</a>`);
+    markers.push(m);bounds.extend([x.la,x.lo]);
+  });
+  if(selected>=0&&list[selected]){map.setView([list[selected].la,list[selected].lo],17);markers[selected]?.openPopup();}
+  else if(list.length)map.fitBounds(bounds,{padding:[35,35],maxZoom:15});else map.setView([loc.lat,loc.lng],zoom);
+  return markers;
+}
 function initHospitalMap(){
   const h=S.hl,el=document.getElementById('hospitalMap');
   if(!el||!h||!h.loc||!h.list||!h.list.length||typeof L==='undefined')return;
   if(hospitalMap){hospitalMap.remove();hospitalMap=null;hospitalMarkers=[];}
-  hospitalMap=L.map(el,{zoomControl:true,scrollWheelZoom:true}).setView([h.loc.lat,h.loc.lng],14);
-  const satellite=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri — Sources: Esri, Maxar, Earthstar Geographics, and the GIS User Community'});
-  const streets=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'});
-  const labels=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,opacity:.95,attribution:'Labels © Esri'});
-  const roads=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,opacity:.9,attribution:'Roads © Esri'});
-  satellite.addTo(hospitalMap);labels.addTo(hospitalMap);roads.addTo(hospitalMap);
-  L.control.layers({'🛰️ Satellite':satellite,'🗺️ Street map':streets},{'Place names':labels,'Roads':roads},{collapsed:false,position:'topright'}).addTo(hospitalMap);
-  const you=L.divIcon({className:'',html:'<div class="user-map-dot"></div>',iconSize:[20,20],iconAnchor:[10,10]});
-  L.marker([h.loc.lat,h.loc.lng],{icon:you,zIndexOffset:1000}).addTo(hospitalMap).bindPopup('<b>Your current location</b>');
-  const bounds=L.latLngBounds([[h.loc.lat,h.loc.lng]]);
-  h.list.forEach((x,i)=>{
-    const color=x.h?'#dc2626':'#0d9488';
-    const ico=L.divIcon({className:'',html:`<div style="width:30px;height:30px;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};box-shadow:0 2px 7px #3338;display:grid;place-items:center"><span style="transform:rotate(45deg);font-size:14px;color:white">${x.h?'H':'C'}</span></div>`,iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-28]});
-    const m=L.marker([x.la,x.lo],{icon:ico}).addTo(hospitalMap).bindPopup(`<b>${esc(x.name)}</b><br>${x.km.toFixed(1)} km from your location<br><a class="map-go" href="${dirURL(x.la,x.lo)}" target="_blank" rel="noopener">GO · Get directions</a>`);
-    hospitalMarkers.push(m);bounds.extend([x.la,x.lo]);
-  });
-  hospitalMap.fitBounds(bounds,{padding:[35,35],maxZoom:15});
-  setTimeout(()=>hospitalMap&&hospitalMap.invalidateSize(),250);
+  hospitalMap=L.map(el,{zoomControl:true,scrollWheelZoom:true,preferCanvas:true}).setView([h.loc.lat,h.loc.lng],14);
+  hospitalMarkers=makeHospitalMap(hospitalMap,h.loc,h.list);
+  setTimeout(()=>hospitalMap&&hospitalMap.invalidateSize(),300);
 }
-function focusHospital(i){const h=S.hl&&S.hl.list&&S.hl.list[i],m=hospitalMarkers[i];if(!h||!m||!hospitalMap)return;hospitalMap.setView([h.la,h.lo],17);m.openPopup();}
+function openHospitalView(i){
+  const h=S.hl&&S.hl.list&&S.hl.list[i];if(!h)return;selectedHospitalIndex=i;
+  const panel=document.getElementById('hospitalView');panel.classList.add('open');panel.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
+  document.getElementById('hvTitle').textContent=h.name;document.getElementById('hvMeta').textContent=`${h.km.toFixed(1)} km away · ${h.h?'Hospital':'Clinic'}${h.ph?' · '+h.ph:''}`;
+  const photos=document.getElementById('hvPhotos');
+  let img='';if(h.image){img=`<img class="hv-photo" src="${esc(h.image)}" alt="${esc(h.name)} exterior" loading="lazy" onerror="this.outerHTML='<div class=hv-photo-placeholder><div class=ico>🏥</div><b>Hospital photo unavailable</b></div>'">`}
+  else if(h.commons){const c=String(h.commons).replace(/^File:/i,'').trim();img=`<a href="https://commons.wikimedia.org/wiki/${encodeURIComponent(c.replace(/ /g,'_'))}" target="_blank" rel="noopener" class="hv-photo-link">View hospital photos</a>`}
+  else img=`<div class="hv-photo-placeholder"><div class="ico">🏥</div><b>Hospital exterior photos</b><span>Verified gate and building photos are not available in the map data.</span><a class="hv-photo-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.name)}" target="_blank" rel="noopener">See real photos in Google Maps</a></div>`;
+  photos.innerHTML=img+`<p class="hv-meta">Photos are shown only when a facility has a linked image. Otherwise use the Google Maps photo link to see current public photos.</p>`;
+  const svc=document.getElementById('hvServices');const services=h.services||[];
+  svc.innerHTML=services.length?services.map(v=>`<div class="hv-service"><i>✓</i><div><b>${esc(v.replace(/_/g,' '))}</b></div></div>`).join(''):`<div class="hv-photo-placeholder"><div class="ico">＋</div><b>Services not listed</b><span>The facility's service information is not available in the public map data. Please call the facility to confirm its services.</span>${h.ph?`<a class="hv-photo-link" href="tel:${h.ph}">Call hospital</a>`:''}</div>`;
+  showHospitalTab('photos');
+  if(hospitalFullMap){hospitalFullMap.remove();hospitalFullMap=null;}
+  const el=document.getElementById('hospitalFullMap');hospitalFullMap=L.map(el,{zoomControl:true,scrollWheelZoom:true,preferCanvas:true}).setView([h.la,h.lo],17);
+  makeHospitalMap(hospitalFullMap,S.hl.loc,S.hl.list,17,i);
+  setTimeout(()=>hospitalFullMap&&hospitalFullMap.invalidateSize(),350);
+}
+function showHospitalTab(tab){
+  const photos=tab==='photos';document.getElementById('hvPhotos').hidden=!photos;document.getElementById('hvServices').hidden=photos;
+  document.getElementById('hvPhotosTab').classList.toggle('active',photos);document.getElementById('hvServicesTab').classList.toggle('active',!photos);
+}
+function closeHospitalView(){const p=document.getElementById('hospitalView');p.classList.remove('open');p.setAttribute('aria-hidden','true');document.body.style.overflow='';if(hospitalFullMap){hospitalFullMap.remove();hospitalFullMap=null;}}
+function goToSelectedHospital(){const h=S.hl&&S.hl.list&&S.hl.list[selectedHospitalIndex];if(h)window.open(dirURL(h.la,h.lo),'_blank','noopener');}
 
 function alerts(){
   const l=store.get('alerts',[]);
@@ -852,5 +904,15 @@ if(useFB)fbAuth.onAuthStateChanged(async u=>{
 render();
 if('serviceWorker' in navigator&&location.protocol!=='file:')addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script>
+
+<div id="hospitalView" aria-hidden="true">
+  <div class="hv-top"><button onclick="closeHospitalView()" aria-label="Back">← Back</button><strong id="hvTitle">Hospital details</strong><button onclick="goToSelectedHospital()">GO</button></div>
+  <div id="hospitalFullMap" aria-label="Full-screen satellite map"></div>
+  <div class="hv-content"><div id="hvMeta" class="hv-meta"></div>
+    <div class="hv-tabs"><button id="hvPhotosTab" class="active" onclick="showHospitalTab('photos')">📷 Hospital photos</button><button id="hvServicesTab" onclick="showHospitalTab('services')">＋ Main services</button></div>
+    <section id="hvPhotos"></section><section id="hvServices" hidden></section>
+  </div>
+</div>
+
 </body>
 </html>
