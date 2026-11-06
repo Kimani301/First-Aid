@@ -99,7 +99,18 @@ main{padding:24px max(24px,calc((100% - 1000px)/2)) 12px}
 nav{width:640px;max-width:100%;margin:6px auto 14px}
 #ov{padding:48px}
 }
-#hospitalMap{height:310px;width:100%;border-radius:16px;z-index:1;background:#f1f5f9}
+#hospitalMap{height:440px;width:100%;border-radius:16px;z-index:1;background:#e5e7eb;border:1px solid #d7dce2;overflow:hidden}
+.hospital-map-wrap{position:relative;margin-top:12px}
+.hospital-map-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.hospital-map-head b{font-size:14px}
+.hospital-map-head span{font-size:12px;color:var(--mut)}
+.leaflet-popup-content{font-size:14px;line-height:1.5}
+.map-go{display:inline-block;margin-top:7px;padding:7px 13px;border-radius:9px;background:#b91c1c;color:#fff;text-decoration:none;font-weight:700}
+.user-map-dot{width:20px;height:20px;border:4px solid #fff;border-radius:50%;background:#2563eb;box-shadow:0 0 0 7px rgba(37,99,235,.22)}
+.hospital-map-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:8px}
+.hospital-map-legend span{display:flex;align-items:center;gap:5px}
+.hospital-map-legend i{display:inline-block;width:10px;height:10px;border-radius:50%}
+@media(min-width:800px){#hospitalMap{height:560px}}
 .hospital-photo{width:100%;height:150px;object-fit:cover;border-radius:15px;display:block;margin-bottom:12px}
 .hospital-item{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .hospital-item:last-child{border-bottom:0}.hospital-pin{width:46px;height:46px;border-radius:14px;background:#ffe3e6;display:grid;place-items:center;font-size:25px;flex:none}
@@ -107,6 +118,30 @@ nav{width:640px;max-width:100%;margin:6px auto 14px}
 .ask-home{display:flex;align-items:center;gap:14px;width:100%;padding:18px;border:0;border-radius:20px;margin:12px 0 14px;text-align:left;color:#fff;background:linear-gradient(120deg,#9f1239,#e11d2e 65%,#f97316);box-shadow:0 8px 22px rgba(190,18,60,.22)}
 .ask-home .ask-icon{width:54px;height:54px;border-radius:17px;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:29px;flex:none}
 .ask-home b{display:block;font-size:18px}.ask-home small{display:block;opacity:.92;font-size:13px}
+.home-welcome{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 2px 18px}
+.home-eyebrow{font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--red)}
+.home-welcome h2{font-size:29px;line-height:1.08;margin:5px 0 7px;color:var(--ink)}
+.home-welcome p{font-size:13px;color:var(--mut)}
+.home-cross{width:76px;height:76px;display:grid;place-items:center;flex:none;border-radius:25px;background:linear-gradient(145deg,#fff,#ffe0e4);color:var(--red);font-size:48px;font-weight:900;box-shadow:var(--sh)}
+.home-ask,.home-emergency{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:18px;padding:14px;text-align:left;margin:0 0 11px;color:#fff}
+.home-ask{background:linear-gradient(115deg,#8f0d1c,#e11d2e 75%,#f97316);box-shadow:0 8px 22px rgba(190,18,60,.2)}
+.home-ask-icon,.home-emergency-icon{width:48px;height:48px;display:grid;place-items:center;flex:none;border-radius:15px;background:rgba(255,255,255,.18);font-size:26px}
+.home-ask-copy{flex:1}.home-ask b,.home-emergency b{display:block;font-size:16px}.home-ask small,.home-emergency small{display:block;font-size:12px;line-height:1.35;opacity:.9;margin-top:2px}
+.home-emergency{background:#fff;border:1px solid #f3c7cc;color:#8f0d1c;box-shadow:var(--sh)}
+.home-emergency-icon{background:#fff0f1;color:#c5162b}
+.home-arrow{font-size:27px;line-height:1;opacity:.8}
+.home-section-head{display:flex;align-items:end;justify-content:space-between;margin:19px 2px 10px}
+.home-section-head h3{font-size:18px}.home-section-head p{font-size:12px;color:var(--mut)}
+.home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.home-feature{position:relative;min-height:128px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:13px 12px;border:1px solid var(--line);border-radius:17px;background:var(--card);color:var(--ink);text-align:left;box-shadow:var(--sh)}
+.home-feature-icon{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--feature) 12%,white);font-size:22px}
+.home-feature-title{font-size:14px;font-weight:750;line-height:1.2}.home-feature small{font-size:11px;color:var(--mut);padding-right:12px}
+.home-feature-arrow{position:absolute;right:11px;bottom:10px;font-size:21px;color:var(--mut)}
+.home-feature:active,.home-ask:active,.home-emergency:active{transform:scale(.98)}
+.home-reminder{display:flex;align-items:flex-start;gap:10px;padding:13px;margin:14px 0 5px;border-radius:16px;background:#fff7e6;border:1px solid #f6e2b4;color:#694b0b}
+.home-reminder>span{font-size:22px}.home-reminder b{display:block;font-size:13px}.home-reminder small{display:block;font-size:12px;line-height:1.4;margin-top:2px}
+@media(min-width:800px){.home-welcome{padding:12px 4px 22px}.home-welcome h2{font-size:36px}.home-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.home-feature{min-height:140px}}
+
 .leaflet-popup-content{font-size:13px}.leaflet-container{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}
 /* red and white blend */
 :root{color-scheme:light;--bg:#ffffff;--ink:#3b0a12;--line:#f1d3d7}
@@ -344,11 +379,24 @@ function render(){
 }
 
 function home(){
-  const g=[['scan','#e11d2e','📷','Check an injury','Photo or video'],['health','#be123c','🏥','Nearby hospitals','Find and go'],['contacts','#f97316','📞','Contacts','Call or edit'],['tips','#db2777','⚠️','Safety tips','New topic daily'],['quiz','#9d174d','🎓','Life skills','New questions daily','wide']];
-  return ['FirstAid',`<div class="hero"><div class="cross">+</div><div><h2>FirstAid</h2><p>Be prepared. Save lives.</p></div></div>
-  ${store.get('profile',{}).role==='Admin'?`<button class="tile" onclick="go('admin')"><i>🛡️</i><div>Admin dashboard<small>View and respond to emergency alerts</small></div></button>`:''}${banner('home')}
-  <button class="ask-home" onclick="go('ask')"><span class="ask-icon">🤖</span><span><b>Ask First Aid</b><small>Get quick guidance for injuries, illness and emergencies</small></span><span style="margin-left:auto;font-size:26px">›</span></button>
-  <div class="grid">${g.map((x,i)=>`<button class="gt${x[5]?' wide':''}" style="--c:${x[1]}" onclick="go('${x[0]}')"><i>${x[2]}</i><div>${x[3]}<small>${x[4]}</small></div></button>`).join('')}</div>`];
+  const g=[
+    ['guides','#e11d2e','📖','First Aid Guides','Step-by-step help'],
+    ['scan','#be123c','📷','Check an Injury','Photo or choose symptoms'],
+    ['health','#f97316','🏥','Nearby Hospitals','Find medical care'],
+    ['contacts','#db2777','📞','Emergency Contacts','People you can call'],
+    ['tips','#9d174d','🛡️','Safety Tips','Prevent accidents'],
+    ['quiz','#7c3aed','🎓','Life Skills Quiz','Test your knowledge']
+  ];
+  return ['FirstAid',`<section class="home-welcome">
+    <div><span class="home-eyebrow">YOUR SAFETY COMPANION</span><h2>Be prepared.<br>Save lives.</h2><p>Simple first aid guidance when you need it.</p></div>
+    <div class="home-cross">✚</div>
+  </section>
+  ${store.get('profile',{}).role==='Admin'?`<button class="tile" onclick="go('admin')"><i>🛡️</i><div>Admin dashboard<small>View and respond to emergency alerts</small></div></button>`:''}
+  <button class="home-ask" onclick="go('ask')"><span class="home-ask-icon">🤖</span><span class="home-ask-copy"><b>Ask First Aid</b><small>Describe what happened and get step-by-step guidance.</small></span><span class="home-arrow">›</span></button>
+  <button class="home-emergency" onclick="location.href='tel:'+mainNum()"><span class="home-emergency-icon">☎</span><span><b>Emergency? Call ${mainNum()}</b><small>For urgent, life-threatening situations</small></span><span class="home-arrow">›</span></button>
+  <div class="home-section-head"><div><h3>Explore FirstAid</h3><p>Choose what you need</p></div></div>
+  <div class="home-grid">${g.map(x=>`<button class="home-feature" onclick="go('${x[0]}')"><span class="home-feature-icon" style="--feature:${x[1]}">${x[2]}</span><span class="home-feature-title">${x[3]}</span><small>${x[4]}</small><span class="home-feature-arrow">›</span></button>`).join('')}</div>
+  <div class="home-reminder"><span>💡</span><div><b>Remember</b><small>Keep calm, make sure the scene is safe, and get professional help when needed.</small></div></div>`];
 }
 /* ---- Check an injury: add a photo or video, pick what it looks like, see what to do (offline, nothing is uploaded) ---- */
 const SCANG=[
@@ -705,12 +753,34 @@ function health(){
   if(h.st==='load')body=`<div class="card"><p>📍 ${h.loc?'Finding health facilities near you…':'Getting your location…'}</p><p class="mut" style="margin-top:6px">Nearby facilities will appear on the map.</p></div>`;
   else if(h.st==='noloc')body=`<div class="card"><p>We could not get your location. Allow location access for this app, then try again.</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
   else if(!h.list.length)body=`<div class="card"><p>No nearby hospitals were returned. Check your internet connection or try again.</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
-  else{const n=[...h.list].sort((a,b)=>a.km-b.km)[0];body=`<div class="card"><img class="hospital-photo" src="https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=1000&q=80" alt="Illustrative hospital building" onerror="this.style.display='none'"><h3>Hospitals and clinics near you</h3><p class="mut">Showing ${h.list.length} nearby facilities, ordered by distance.</p><div style="margin-top:12px"><div id="hospitalMap" aria-label="Map showing nearby hospitals and clinics"></div><p class="map-note">Map data © OpenStreetMap contributors. Tap a marker to see the facility name.</p></div></div><button class="btn red block" style="font-size:16px;padding:15px;margin-bottom:12px" onclick="window.open(dirURL(${n.la},${n.lo}),'_blank')">🧭 Directions to nearest: ${esc(n.name)}</button><div class="card"><h3>Nearby facilities</h3>${h.list.map((x,i)=>`<div class="hospital-item"><div class="hospital-pin">${x.h?'🏥':'⚕️'}</div><div style="flex:1;min-width:0"><b>${esc(x.name)}</b><div class="mut">${x.km.toFixed(1)} km away · ${x.h?'Hospital':'Clinic'}</div></div>${x.ph?`<button class="btn ghost" onclick="location.href='tel:${x.ph}'">Call</button>`:''}<button class="btn" onclick="focusHospital(${i})">View</button></div>`).join('')}</div>`;}
+  else{const n=[...h.list].sort((a,b)=>a.km-b.km)[0];body=`<div class="card"><h3>Hospitals and clinics near you</h3><p class="mut">Satellite imagery with nearby facilities marked on the map. Select a marker or facility to view it.</p><div class="hospital-map-wrap"><div class="hospital-map-head"><b>📍 Live location map</b><span>Satellite view</span></div><div id="hospitalMap" aria-label="Satellite map showing your location and nearby hospitals"></div><div class="hospital-map-legend"><span><i style="background:#2563eb"></i>Your location</span><span><i style="background:#dc2626"></i>Hospitals</span><span><i style="background:#0d9488"></i>Clinics</span></div><p class="map-note">Satellite imagery © Esri, Maxar, Earthstar Geographics and GIS User Community. Imagery is not live video and may not be up to date.</p></div></div><button class="btn red block" style="font-size:17px;padding:16px;margin:0 0 12px" onclick="window.open(dirURL(${n.la},${n.lo}),'_blank')">🧭 GO to nearest: ${esc(n.name)}</button><div class="card"><h3>Nearby facilities</h3>${h.list.map((x,i)=>`<div class="hospital-item"><div class="hospital-pin">${x.h?'🏥':'⚕️'}</div><div style="flex:1;min-width:0"><b>${esc(x.name)}</b><div class="mut">${x.km.toFixed(1)} km away · ${x.h?'Hospital':'Clinic'}</div></div>${x.ph?`<button class="btn ghost" onclick="location.href='tel:${x.ph}'">Call</button>`:''}<button class="btn ghost" onclick="focusHospital(${i})">View</button><button class="btn red" onclick="window.open(dirURL(${x.la},${x.lo}),'_blank')">GO</button></div>`).join('')}</div>`;}
   return ['Nearby hospitals',body+(h.st!=='load'?'<button class="btn ghost block" style="margin-top:10px" onclick="loadHealth();render()">Refresh nearby facilities</button>':'')+'<p class="warn">For a life-threatening emergency, seek urgent in-person help immediately.</p>'];
 }
 let hospitalMap=null,hospitalMarkers=[];
-function initHospitalMap(){const h=S.hl,el=document.getElementById('hospitalMap');if(!el||!h||!h.loc||!h.list||!h.list.length||typeof L==='undefined')return;if(hospitalMap){hospitalMap.remove();hospitalMap=null;hospitalMarkers=[];}hospitalMap=L.map(el).setView([h.loc.lat,h.loc.lng],13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'}).addTo(hospitalMap);L.marker([h.loc.lat,h.loc.lng]).addTo(hospitalMap).bindPopup('Your current location');h.list.forEach(x=>{const m=L.marker([x.la,x.lo]).addTo(hospitalMap).bindPopup(`<b>${esc(x.name)}</b><br>${x.km.toFixed(1)} km away`);hospitalMarkers.push(m);});setTimeout(()=>hospitalMap&&hospitalMap.invalidateSize(),150);}
-function focusHospital(i){const h=S.hl&&S.hl.list&&S.hl.list[i],m=hospitalMarkers[i];if(!h||!m||!hospitalMap)return;hospitalMap.setView([h.la,h.lo],16);m.openPopup();}
+function initHospitalMap(){
+  const h=S.hl,el=document.getElementById('hospitalMap');
+  if(!el||!h||!h.loc||!h.list||!h.list.length||typeof L==='undefined')return;
+  if(hospitalMap){hospitalMap.remove();hospitalMap=null;hospitalMarkers=[];}
+  hospitalMap=L.map(el,{zoomControl:true,scrollWheelZoom:true}).setView([h.loc.lat,h.loc.lng],14);
+  const satellite=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri — Sources: Esri, Maxar, Earthstar Geographics, and the GIS User Community'});
+  const streets=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'});
+  const labels=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,opacity:.95,attribution:'Labels © Esri'});
+  const roads=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,opacity:.9,attribution:'Roads © Esri'});
+  satellite.addTo(hospitalMap);labels.addTo(hospitalMap);roads.addTo(hospitalMap);
+  L.control.layers({'🛰️ Satellite':satellite,'🗺️ Street map':streets},{'Place names':labels,'Roads':roads},{collapsed:false,position:'topright'}).addTo(hospitalMap);
+  const you=L.divIcon({className:'',html:'<div class="user-map-dot"></div>',iconSize:[20,20],iconAnchor:[10,10]});
+  L.marker([h.loc.lat,h.loc.lng],{icon:you,zIndexOffset:1000}).addTo(hospitalMap).bindPopup('<b>Your current location</b>');
+  const bounds=L.latLngBounds([[h.loc.lat,h.loc.lng]]);
+  h.list.forEach((x,i)=>{
+    const color=x.h?'#dc2626':'#0d9488';
+    const ico=L.divIcon({className:'',html:`<div style="width:30px;height:30px;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};box-shadow:0 2px 7px #3338;display:grid;place-items:center"><span style="transform:rotate(45deg);font-size:14px;color:white">${x.h?'H':'C'}</span></div>`,iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-28]});
+    const m=L.marker([x.la,x.lo],{icon:ico}).addTo(hospitalMap).bindPopup(`<b>${esc(x.name)}</b><br>${x.km.toFixed(1)} km from your location<br><a class="map-go" href="${dirURL(x.la,x.lo)}" target="_blank" rel="noopener">GO · Get directions</a>`);
+    hospitalMarkers.push(m);bounds.extend([x.la,x.lo]);
+  });
+  hospitalMap.fitBounds(bounds,{padding:[35,35],maxZoom:15});
+  setTimeout(()=>hospitalMap&&hospitalMap.invalidateSize(),250);
+}
+function focusHospital(i){const h=S.hl&&S.hl.list&&S.hl.list[i],m=hospitalMarkers[i];if(!h||!m||!hospitalMap)return;hospitalMap.setView([h.la,h.lo],17);m.openPopup();}
 
 function alerts(){
   const l=store.get('alerts',[]);
