@@ -115,6 +115,25 @@ nav button.on{color:var(--head)}
 .pill{padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;background:#ffe3e6;color:#c81428}.pill.Responding{background:#fff1d6;color:#8a5a00}.pill.Resolved{background:#dff5e8;color:#0d4a27}
 nav:empty{display:none}
 #back{width:auto;border-radius:20px;padding:0 14px;font-size:15px;font-weight:600}
+.msg{max-width:92%;padding:10px 14px;border-radius:18px;margin-bottom:10px;font-size:15.5px}
+.msg.u{background:#e11d2e;color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+.msg.a{background:var(--card);border:1px solid var(--line);box-shadow:var(--sh);border-bottom-left-radius:4px}
+.msg p{margin:0 0 6px}.msg ul,.msg ol{padding-left:20px;margin:0 0 6px}
+.askbar{display:flex;gap:8px}.askbar input{margin:0;flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}.chips button{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:8px 12px;font-size:14px;color:var(--ink)}
+.chathead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.chathead b{font-size:15px;color:var(--mut)}.chathead button{border:0;background:var(--line);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:650;color:var(--ink)}
+.m2{display:flex;gap:8px;align-items:flex-start;margin-bottom:12px}.m2.u{justify-content:flex-end}.m2 .msg{margin:0;max-width:calc(100% - 42px)}.m2.u .msg{max-width:85%}
+.who{width:32px;height:32px;border-radius:50%;background:#ffe3e6;display:grid;place-items:center;font-size:17px;flex:none}
+.tm{display:block;font-size:11px;opacity:.6;margin-top:4px}
+.sticky{position:sticky;bottom:0;background:var(--bg);padding:8px 0 6px;margin-top:6px;z-index:2}
+.msg.err{border-color:#e11d2e;background:#fff1f2}.errd{font-size:11px;opacity:.7;word-break:break-word;margin-top:4px}
+.dots::after{content:'';animation:dt 1.2s infinite}@keyframes dt{0%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'...'}}
+.pic{flex:none;display:grid;place-items:center;border-radius:16px;position:relative;overflow:hidden;background:radial-gradient(circle at 25% 20%,#fff 0,#ffdfe3 38%,#ff9fab 100%);box-shadow:inset 0 0 0 2px rgba(255,255,255,.75),0 4px 10px rgba(143,13,28,.18)}
+.pic::before{content:'';position:absolute;width:62%;height:62%;right:-14%;bottom:-14%;border-radius:50%;background:rgba(225,29,46,.2)}
+.pic::after{content:'';position:absolute;width:26%;height:26%;left:10%;top:12%;border-radius:50%;background:rgba(255,255,255,.7)}
+.pic span{position:relative;line-height:1;z-index:1}
+.pic.hero{width:100%;border-radius:20px;margin-bottom:12px}
+.ph{display:flex;align-items:center;gap:10px}
 </style>
 </head>
 <body>
@@ -141,7 +160,7 @@ const hashPw=s=>{let x=0x811c9dc5;for(const c of s){x^=c.charCodeAt(0);x=Math.im
 const DB={
   async saveAlert(a){
     if(useFB){try{await fbDb.collection('Emergencies').add({...a,userId:fbAuth.currentUser?fbAuth.currentUser.uid:null,status:'New',time:firebase.firestore.FieldValue.serverTimestamp()});return}catch(e){}}
-    const t=Date.now(),l=store.get('allAlerts',[]);l.unshift({...a,id:'L'+t,time:t,status:'New'});store.set('allAlerts',l.slice(0,100));
+    const t=Date.now(),l=store.get('allAlerts',[]);l.unshift({...a,id:'L'+t,time:t,status:'New'});l.forEach((x,i)=>{if(i>=5)delete x.photo});store.set('allAlerts',l.slice(0,100));
   },
   watch(cb){
     if(useFB){return fbDb.collection('Emergencies').orderBy('time','desc').limit(100).onSnapshot(
@@ -275,7 +294,7 @@ quiz:['Solve everyday problems',`<path d="M60 20 108 40 60 60 12 40z" fill="${W}
 health:['Find care near you',`<ellipse cx="60" cy="90" rx="24" ry="5" fill="${P}"/><path d="M60 8a28 28 0 0 1 28 28c0 22-28 52-28 52S32 58 32 36A28 28 0 0 1 60 8z" fill="${W}"/><rect x="55" y="24" width="10" height="26" rx="2" fill="${R}"/><rect x="47" y="32" width="26" height="10" rx="2" fill="${R}"/>`],
 alerts:['Your past alerts',`<circle cx="60" cy="50" r="38" fill="${W}"/><path d="M60 26v26l18 10" stroke="${R}" stroke-width="6" fill="none" stroke-linecap="round"/>`]
 };
-BAN.admin=['Monitor emergency alerts',BAN.alerts[1]];BAN.scan=['Add a photo or video, then see what to do',BAN.health[1]];BAN.login=['Welcome. Sign in to continue',BAN.home[1]];
+BAN.admin=['Monitor emergency alerts',BAN.alerts[1]];BAN.scan=['Add a photo or video, then see what to do',`<rect x="14" y="30" width="92" height="58" rx="12" fill="${W}"/><rect x="40" y="18" width="40" height="16" rx="6" fill="${W}"/><circle cx="60" cy="60" r="20" fill="${R}"/><circle cx="60" cy="60" r="12" fill="${P}"/><rect x="56" y="52" width="8" height="16" rx="2" fill="${W}"/><rect x="52" y="56" width="16" height="8" rx="2" fill="${W}"/>`];BAN.login=['Welcome. Sign in to continue',BAN.home[1]];BAN.ask=['Free first aid help, any time',`<path d="M16 14h62a10 10 0 0 1 10 10v30a10 10 0 0 1-10 10H44L28 80V64h-12a10 10 0 0 1-10-10V24a10 10 0 0 1 10-10z" fill="${W}"/><rect x="38" y="24" width="10" height="30" rx="2" fill="${R}"/><rect x="28" y="34" width="30" height="10" rx="2" fill="${R}"/><path d="M70 58h30a8 8 0 0 1 8 8v14a8 8 0 0 1-8 8h-4v12l-12-12H70a8 8 0 0 1-8-8V66a8 8 0 0 1 8-8z" fill="${P}"/>`];
 const banner=k=>BAN[k]?`<div class="ban"><b>${BAN[k][0]}</b><svg viewBox="0 0 120 100" aria-hidden="true">${BAN[k][1]}</svg></div>`:'';
 function go(r,a,nopush){S.hist=S.hist||[];if(!nopush&&S.route&&S.route!==r&&S.route!=='login'){S.hist.push({route:S.route,arg:S.arg});history.pushState(null,'')}S.nums=null;if(S.unsub){S.unsub();S.unsub=null}S.route=r;S.arg=a??null;if(r==='admin'){S.alerts=null;S.lastJ='';S.unsub=DB.watch((x,err)=>{const j=JSON.stringify(x)+err;if(j===S.lastJ)return;S.lastJ=j;S.alerts=x;S.err=err;if(S.route==='admin')render()})}if(r==='quiz'){S.round=0;S.q={i:0,sc:0,done:false,pick:null}}if(r==='health')loadHealth();if(r==='scan'){S.scanCat=null;S.scanSel=null}render();$('#app').scrollTop=0}
 function doBack(){const p=(S.hist||[]).pop();go(p?p.route:'home',p?p.arg:null,true)}
@@ -289,15 +308,15 @@ function render(){
   $('#back').hidden=r==='home'||r==='login'||r==='install';
   $('#nav').innerHTML=NAV.map(n=>`<button class="${n[0]===r||(r==='guide'&&n[0]==='guides')?'on':''}${n[0]==='sos'?' sosn':''}" onclick="navTo('${n[0]}')"><b>${n[1]}</b>${n[2]}</button>`).join('');
   if(r==='login'||r==='install')$('#nav').innerHTML='';
-  const V={home,guides,guide,scan,install,sos,contacts,more,tips,quiz,health,alerts,login,admin};
+  const V={home,guides,guide,scan,install,sos,contacts,more,tips,quiz,health,alerts,login,admin,ask};
   const o=V[r]();$('#ttl').textContent=o[0];A.innerHTML=(r==='home'?'':banner(r))+o[1];
 }
 
 function home(){
-  const g=[['guides','#e11d2e','➕','First aid guide',GUIDES.length+' situations'],['health','#b91c1c','🏥','Nearby hospitals','Find and go'],['scan','#c81e4a','📷','Check an injury','Photo or video'],['contacts','#d9480f','📞','Contacts','Call or edit'],['tips','#a61e4d','⚠️','Safety tips',TIPS.length+' topics'],['quiz','#7c1d3a','🎓','Life skills','New questions daily']];
+  const g=[['ask','#e11d2e','🤖','Ask First Aid','Free AI help. Search any topic'],['guides','#e11d2e','➕','First aid guide',GUIDES.length+' situations'],['health','#b91c1c','🏥','Nearby hospitals','Find and go'],['scan','#c81e4a','📷','Check an injury','Photo or video'],['contacts','#d9480f','📞','Contacts','Call or edit'],['tips','#a61e4d','⚠️','Safety tips','New topic daily'],['quiz','#7c1d3a','🎓','Life skills','New questions daily']];
   return ['FirstAid',`<div class="hero"><div class="cross">+</div><div><h2>FirstAid</h2><p>Be prepared. Save lives.</p></div></div>
   ${store.get('profile',{}).role==='Admin'?`<button class="tile" onclick="go('admin')"><i>🛡️</i><div>Admin dashboard<small>View and respond to emergency alerts</small></div></button>`:''}${banner('home')}<button class="alert" onclick="go('sos')"><i>SOS</i><div>Emergency alert<small>Send your location to your contacts</small></div></button>
-  <div class="grid">${g.map((x,i)=>`<button class="gt" style="--c:${x[1]}" onclick="go('${x[0]}')"><i>${x[2]}</i><div>${x[3]}<small>${x[4]}</small></div></button>`).join('')}</div>`];
+  <div class="grid">${g.map((x,i)=>`<button class="gt${x[0]==='ask'?' wide':''}" style="--c:${x[1]}" onclick="go('${x[0]}')"><i>${x[2]}</i><div>${x[3]}<small>${x[4]}</small></div></button>`).join('')}</div>`];
 }
 /* ---- Check an injury: add a photo or video, pick what it looks like, see what to do (offline, nothing is uploaded) ---- */
 const SCANG=[
@@ -350,13 +369,28 @@ const SCANF={
 'Asthma attack':['There is no improvement in 10 minutes','The person cannot speak a full sentence','Lips look blue, or they become exhausted or drowsy'],
 'CPR (not breathing)':['Always call first, then start CPR.']
 };
-function pickMedia(inp){const f=inp.files&&inp.files[0];if(!f)return;if(S.media)URL.revokeObjectURL(S.media.url);S.media={url:URL.createObjectURL(f),video:(f.type||'').startsWith('video'),file:f};render()}
-function clearMedia(){if(S.media)URL.revokeObjectURL(S.media.url);S.media=null;render()}
+function pickMedia(inp){const f=inp.files&&inp.files[0];if(!f)return;if(S.media)URL.revokeObjectURL(S.media.url);S.sent=false;S.photoAI='';S.media={url:URL.createObjectURL(f),video:(f.type||'').startsWith('video'),file:f};render()}
+/* ---- Free photo sending: shrink the photo on the phone, then save it inside the alert in Firestore (no paid Storage needed) ---- */
+function shrinkImage(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{URL.revokeObjectURL(u);let W=800,q=0.7,out='';
+    for(let k=0;k<6;k++){const r=Math.min(1,W/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*r);c.height=Math.round(im.height*r);
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);
+      if(out.length<180000)break;W=Math.round(W*0.8);q=Math.max(0.45,q-0.08)}
+    out.length<700000?res(out):rej(new Error('Photo is too large'))};
+  im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('Could not read this photo'))};im.src=u})}
+async function sendPhoto(){const m=S.media;if(!m||m.video)return;
+  if(!confirm('Send this photo to the school nurse / admin?\n\nOnly send it if the injured person agrees, and tell a teacher or adult nearby.'))return;
+  S.sending=true;render();
+  try{const photo=await shrinkImage(m.file);const loc=await getLoc();
+    await DB.saveAlert({type:'photo',name:store.get('me','Unknown'),photo,note:(S.photoNote||'').slice(0,300),lat:loc?loc.lat:null,lng:loc?loc.lng:null});
+    S.sent=true;S.photoNote=''}catch(e){alert('Could not send: '+e.message)}
+  S.sending=false;render()}
+function clearMedia(){S.sent=false;S.photoAI='';if(S.media)URL.revokeObjectURL(S.media.url);S.media=null;render()}
 async function shareMedia(){const f=S.media&&S.media.file;if(!f)return;try{if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:'Injury photo',text:'Sent from the FirstAid app'});else alert('Sharing is not available on this device. Save the photo and send it by WhatsApp or email.')}catch(e){}}
 function scan(){
   const m=S.media,cat=S.scanCat,sel=S.scanSel;
   const photo=m?`<div class="card"><div class="mut" style="margin-bottom:6px">Your ${m.video?'video':'photo'}</div>${m.video?`<video class="prev" src="${m.url}" controls playsinline></video>`:`<img class="prev" src="${m.url}" alt="Your photo">`}
-    <div style="display:flex;gap:8px;margin-top:8px"><button class="btn ghost" onclick="shareMedia()">Share with a nurse</button><button class="btn ghost" onclick="clearMedia()">Remove</button></div></div>`:'';
+    <div style="display:flex;gap:8px;margin-top:8px"><button class="btn ghost" onclick="shareMedia()">Share</button><button class="btn ghost" onclick="clearMedia()">Remove</button></div></div>`:'';
   const back=t=>`<button class="btn ghost" style="margin-bottom:10px" onclick="${t}">← Back</button>`;
   if(sel!=null){const G=GUIDES[sel],fl=SCANF[G.t]||['The person gets worse, or you are worried'];
     return [G.t,back("S.scanSel=null;render();$('#app').scrollTop=0")+photo+`<div class="gh"><i>${G.i}</i><div><h2>${G.t}</h2><p class="mut">${SCANL[G.t]||''}</p></div></div>
@@ -369,16 +403,113 @@ function scan(){
     return [C[0],back("S.scanCat=null;render();$('#app').scrollTop=0")+photo+`<p class="mut" style="margin-bottom:10px">Tap the one that looks closest to what you see.</p>
     ${rows.map(x=>`<button class="tile" onclick="S.scanSel=${x.gi};render();$('#app').scrollTop=0"><i style="background:var(--bg)">${GUIDES[x.gi].i}</i><div>${x.t}<small>${SCANL[x.t]||''}</small></div></button>`).join('')}`]}
   return ['Check an injury',`<div class="card"><h3>📸 Add a photo or video <span class="mut" style="font-weight:400">(optional)</span></h3>
-    <p class="mut" style="margin:4px 0 10px">Keep it beside the steps while you help. It stays on your phone and is never uploaded.</p>
-    ${m?`${m.video?`<video class="prev" src="${m.url}" controls playsinline></video>`:`<img class="prev" src="${m.url}" alt="Your photo">`}<div style="display:flex;gap:8px;margin:8px 0 10px"><button class="btn ghost" onclick="shareMedia()">Share with a nurse</button><button class="btn ghost" onclick="clearMedia()">Remove</button></div>`:''}
+    <p class="mut" style="margin:4px 0 10px">Keep it beside the steps while you help. It stays on your phone unless you tap <b>Send to nurse</b>.</p>
+    ${m?`${m.video?`<video class="prev" src="${m.url}" controls playsinline></video>`:`<img class="prev" src="${m.url}" alt="Your photo">`}<div style="display:flex;gap:8px;margin:8px 0 10px"><textarea id="pn" maxlength="300" placeholder="Short note (what happened?) - optional" oninput="S.photoNote=this.value" style="width:100%;border:1px solid #ddd;border-radius:12px;padding:10px;font:inherit;margin-bottom:8px">${esc(S.photoNote||'')}</textarea>
+    ${m.video?'<p class="mut">Videos are too big to send for free. Use Share to send by WhatsApp.</p>':(S.sent?'<p style="color:#0d4a27;font-weight:700;margin:6px 0">✅ Sent to the nurse / admin</p>':`<button class="btn red block" ${S.sending?'disabled':''} onclick="sendPhoto()">${S.sending?'Sending…':'📤 Send to nurse'}</button>`)}
+    ${photoAIBox()}<div style="display:flex;gap:8px;margin:8px 0 10px"><button class="btn ghost" onclick="shareMedia()">Share</button><button class="btn ghost" onclick="clearMedia()">Remove</button></div>`:''}
     <div class="mgrid">
     <label class="mb"><input type="file" accept="image/*" capture="environment" hidden onchange="pickMedia(this)"><b>📷</b>Take photo</label>
     <label class="mb"><input type="file" accept="video/*" capture="environment" hidden onchange="pickMedia(this)"><b>🎥</b>Record video</label>
     <label class="mb"><input type="file" accept="image/*,video/*" hidden onchange="pickMedia(this)"><b>🖼️</b>Gallery</label></div></div>
     <h3 style="margin:14px 2px 10px">What happened?</h3>
     <div class="cgrid">${SCANG.map((c,i)=>`<button class="cat" onclick="S.scanCat=${i};render();$('#app').scrollTop=0"><i>${c[1]}</i>${c[0]}</button>`).join('')}</div>
-    <p class="warn">The app does not analyse the photo. You choose what it looks like, and the steps are first-aid guidance only.</p>`];
+    <p class="warn">Ask First Aid (AI) can look at a photo when you are online. You can also choose what it looks like. This is first-aid guidance only, not a diagnosis.</p>`];
 }
+/* ---- Ask First Aid: free AI chat (Firebase AI Logic + Gemini free tier). Needs internet; offline it shows the app guides ---- */
+const AI_MODELS=['gemini-2.5-flash','gemini-2.5-flash-lite'],AI_VER='11.10.0';
+const AI_SYS="You are Ask First Aid, a caring, knowledgeable first-aid and health-safety assistant inside the FirstAid school app in Kenya. The emergency number is 112. Answer every question about first aid, injuries, illness, hygiene, health and safety fully and helpfully, like an experienced first aider talking to a student or teacher. Use simple words and clear Markdown: short paragraphs, numbered steps for what to do, bullet points, and **bold** for warnings. Say clearly when to call 112 or go to hospital. For medicines, say to follow the label or ask a pharmacist and never give exact doses for children. Politely decline topics unrelated to health and safety. Reply in the language the person writes in (English or Kiswahili).";
+const AI_BASE='https://firebasevertexai.googleapis.com/v1beta/projects/'+FB.projectId+'/models/';
+async function aiRest(model,contents){
+  const r=await fetch(AI_BASE+model+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':FB.apiKey,'x-goog-api-client':'firebase-js/'+AI_VER+' fire/'+AI_VER},
+    body:JSON.stringify({contents,systemInstruction:{parts:[{text:AI_SYS}]},generationConfig:{maxOutputTokens:2048,temperature:.5},safetySettings:[{category:'HARM_CATEGORY_DANGEROUS_CONTENT',threshold:'BLOCK_ONLY_HIGH'}]})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(r.status+' '+((j.error&&((j.error.status||'')+': '+j.error.message))||r.statusText));
+  const c=j.candidates&&j.candidates[0],t=c&&c.content&&c.content.parts?c.content.parts.map(x=>x.text||'').join(''):'';
+  if(!t)throw new Error('SAFETY blocked '+((j.promptFeedback&&j.promptFeedback.blockReason)||(c&&c.finishReason)||'empty'));
+  return t}
+async function aiRun(contents){let last;for(const n of AI_MODELS){try{return await aiRest(n,contents)}catch(e){last=e;if(!/404|NOT_FOUND|not found|no longer available|deprecated/i.test(String((e&&e.message)||e)))throw e}}throw last}
+const askAI=parts=>aiRun([{role:'user',parts:(Array.isArray(parts)?parts:[parts]).map(x=>typeof x==='string'?{text:x}:x)}]);
+const chatAI=(hist,q)=>aiRun([...hist,{role:'user',parts:[{text:q}]}]);
+function aiErr(e){const m=String((e&&e.message)||e||'');
+  if(/Failed to fetch|NetworkError|Load failed|network/i.test(m))return{t:'Could not reach the AI service. Check your internet connection and tap Try again.',d:m};
+  if(/PERMISSION_DENIED|403|has not been used|not been enabled|API key not valid|API_KEY/i.test(m))return{t:'Ask First Aid is not switched on yet. (Admin: Firebase console > Build > AI Logic > Get started > Gemini Developer API.)',d:m};
+  if(/429|quota|RESOURCE_EXHAUSTED/i.test(m))return{t:'Ask First Aid is very busy right now (the free limit was reached). Please try again in a minute.',d:m};
+  if(/SAFETY|blocked|PROHIBITED/i.test(m))return{t:'I could not answer that one. Please ask it in a different way. If it is urgent, call '+mainNum()+'.',d:m};
+  return{t:'Ask First Aid could not answer. Check your internet and tap Try again.',d:m}}
+async function aiProbe(){let net=true,svc=true;
+  try{await fetch('https://www.google.com/generate_204',{mode:'no-cors',cache:'no-store'})}catch(e){net=false}
+  if(net){try{await fetch(AI_BASE+AI_MODELS[0]+':generateContent?key='+encodeURIComponent(FB.apiKey),{method:'POST',body:'{}'})}catch(e){svc=false}}
+  return net?(svc?'ok':'svc'):'net'}
+async function aiFail(e){const er=aiErr(e);
+  if(/Failed to fetch|NetworkError|Load failed|network/i.test(String((e&&e.message)||e||''))){const k=await aiProbe();
+    if(k==='net')er.t='This screen is blocked from the internet. It looks like the app is open inside a preview or viewer. Open your published app link (GitHub Pages) in Chrome, or the installed app, then try again.';
+    else if(k==='svc')er.t='The internet works, but the AI service could not be reached. In Firebase, make sure AI Logic is switched on and your API key is not restricted. Then try again.';
+    er.d=(er.d||'')+' ['+k+']'}
+  return er}
+function fmt(t){const L=esc(t).split('\n');let o='',ul=false,ol=false;const close=()=>{if(ul){o+='</ul>';ul=false}if(ol){o+='</ol>';ol=false}};
+  for(let l of L){l=l.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');let m;
+    if(m=l.match(/^\s*#{1,4}\s+(.*)/)){close();o+='<p><b>'+m[1]+'</b></p>'}
+    else if(m=l.match(/^\s*[-*•]\s+(.*)/)){if(!ol&&!ul||ol){close();o+='<ul>';ul=true}o+='<li>'+m[1]+'</li>'}
+    else if(m=l.match(/^\s*\d+[.)]\s+(.*)/)){if(!ol){close();o+='<ol>';ol=true}o+='<li>'+m[1]+'</li>'}
+    else{close();if(l.trim())o+='<p>'+l+'</p>'}}
+  close();return o}
+function localAnswer(q){const w=q.toLowerCase().split(/[^a-z]+/).filter(x=>x.length>2),sc=t=>w.reduce((n,k)=>n+(t.includes(k)?1:0),0);
+  const G=GUIDES.map(g=>({g,n:sc((g.t+' '+g.s.join(' ')).toLowerCase())+3*sc(g.t.toLowerCase())})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n)[0];
+  const T=TIPS.map(t=>({t,n:sc((t.c+' '+t.l.join(' ')).toLowerCase())+3*sc(t.c.toLowerCase())})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n)[0];
+  if(G&&(!T||G.n>=T.n))return `**${G.g.i} ${G.g.t}**\n`+G.g.s.map((x,i)=>`${i+1}. ${x}`).join('\n')+`\n\nIf the person gets worse, call ${mainNum()} now.`;
+  if(T)return `**${T.t.i} ${T.t.c}**\n`+T.t.l.map(x=>`- ${x}`).join('\n');
+  return `I need the internet to answer that. In an emergency call ${mainNum()} now.`}
+const scrollEnd=()=>{const a=$('#app');if(a)a.scrollTop=a.scrollHeight};
+const tmf=t=>new Date(t||Date.now()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+const saveChat=()=>store.set('askChat',(S.chat||[]).filter(m=>!m.pending&&!m.err).slice(-40));
+function chatHist(){const C=S.chat||[],h=[];for(let i=0;i<C.length-1;i++){const u=C[i],a=C[i+1];if(u.r==='u'&&a.r==='a'&&!a.err&&!a.pending&&!a.off&&a.raw){h.push({role:'user',parts:[{text:u.t}]},{role:'model',parts:[{text:a.raw}]})}}return h.slice(-12)}
+function chatHTML(){const C=S.chat||[],ch=['🔥 How do I treat a burn?','🐍 What to do for a snake bite','🏫 Fire at school, what now?','🩸 How to stop a nosebleed','💧 Is this water safe to drink?'];
+  let o=`<div class="m2"><div class="who">🤖</div><div class="msg a"><p>Hi, I am <b>Ask First Aid</b> 👋</p><p>Ask me anything about first aid, health or staying safe. I answer in English or Kiswahili.</p></div></div>`;
+  o+=C.map(m=>m.r==='u'?`<div class="m2 u"><div class="msg u">${esc(m.t)}<span class="tm">${tmf(m.ts)}</span></div></div>`
+    :`<div class="m2"><div class="who">🤖</div><div class="msg a${m.err?' err':''}">${m.pending?'<span class="dots mut">Ask First Aid is typing</span>':(m.err?`<p>${esc(m.err.t)}</p>${m.err.d?`<div class="errd">${esc(m.err.d.slice(0,200))}</div>`:''}<button class="btn ghost" style="margin-top:8px" onclick="askRetry()">↻ Try again</button>`:fmt(m.raw)+(m.off?'<p class="mut">You are offline, so this came from the app guides.</p>':'')+`<span class="tm">${tmf(m.ts)}</span>`)}</div></div>`).join('');
+  if(!C.length)o+=`<div class="chips">${ch.map(c=>`<button onclick="askSend('${c}')">${c}</button>`).join('')}</div>`;
+  return o}
+function paintChat(){const l=$('#chatlog');if(l){l.innerHTML=chatHTML();scrollEnd()}}
+async function askSend(q){const inp=$('#aq');q=(q||(inp&&inp.value)||'').trim();if(!q||S.askBusy)return;if(inp)inp.value='';
+  if(!S.chat)S.chat=store.get('askChat',[]);const hist=chatHist();
+  const a={r:'a',pending:true,ts:Date.now()};S.chat.push({r:'u',t:q,ts:Date.now()},a);S.askBusy=true;paintChat();
+  try{if(!navigator.onLine){a.raw=localAnswer(q);a.off=true}else a.raw=await chatAI(hist,q)}
+  catch(e){a.err=await aiFail(e)}
+  a.pending=false;a.ts=Date.now();S.askBusy=false;if(!a.err)saveChat();if(S.route==='ask')paintChat()}
+function askRetry(){const C=S.chat||[],a=C[C.length-1],u=C[C.length-2];if(S.askBusy||!a||!a.err||!u)return;C.splice(-2);askSend(u.t)}
+function newChat(){if(S.askBusy)return;S.chat=[];store.set('askChat',[]);paintChat()}
+function ask(){if(!S.chat)S.chat=store.get('askChat',[]);if(S.chat.length)setTimeout(scrollEnd,30);
+  return ['Ask First Aid',`<div class="dang" style="position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:10px;justify-content:space-between"><b>🚨 Emergency? Call now, do not type.</b><button class="btn red" onclick="location.href='tel:'+mainNum()">Call ${mainNum()}</button></div>
+  <div class="chathead"><b>Chat</b><button onclick="newChat()">＋ New chat</button></div>
+  <div id="chatlog">${chatHTML()}</div>
+  <div class="sticky"><div class="askbar"><input id="aq" placeholder="Type your question…" autocomplete="off" enterkeyhint="send" onkeydown="if(event.key==='Enter')askSend()"><button class="btn red" onclick="askSend()">Send</button></div>
+  <p class="mut" style="font-size:12px;margin-top:6px">Free AI help. Needs internet. Guidance only, not a doctor.</p></div>`]}
+async function askPhoto(){const m=S.media;if(!m||m.video||S.photoBusy)return;S.photoBusy=true;S.photoAI='';render();let h;
+  try{if(!navigator.onLine)throw new Error('offline');const data=await shrinkImage(m.file);
+    const txt=await askAI([`The user took this photo of an injury or emergency.${S.photoNote?' Their note: '+S.photoNote:''} Say briefly what you can see (do not diagnose), then give clear first-aid steps. If it looks serious start with **Call ${mainNum()} now**. If the photo is unclear, say so and ask what happened.`,{inlineData:{data:data.split(',')[1],mimeType:'image/jpeg'}}]);h=fmt(txt)}
+  catch(e){const er=navigator.onLine?await aiFail(e):{t:'You are offline. Connect to the internet so Ask First Aid can look at the photo. Meanwhile pick what it looks like below and follow the steps.'};h=`<p>${esc(er.t)}</p>${er.d?`<div class="errd">${esc(er.d.slice(0,200))}</div>`:''}`}
+  S.photoAI=h+'<p class="mut">Guidance only, not a diagnosis.</p>';S.photoBusy=false;if(S.route==='scan')render()}
+function photoAIBox(){const m=S.media;if(!m||m.video)return'';
+  return `<button class="btn block" style="margin-bottom:8px" ${S.photoBusy?'disabled':''} onclick="askPhoto()">${S.photoBusy?'Ask First Aid is looking…':'🤖 Ask First Aid: what should I do?'}</button>${S.photoAI?`<div class="msg a" style="max-width:100%">${S.photoAI}</div>`:''}`}
+/* ---- Pictures: every item gets a matching illustration tile ---- */
+const pic=(e,n)=>`<div class="pic" style="width:${n}px;height:${n}px;font-size:${Math.round(n*.55)}px"><span>${e}</span></div>`;
+const picH=(e,h)=>`<div class="pic hero" style="height:${h||100}px;font-size:${Math.round((h||100)*.62)}px"><span>${e}</span></div>`;
+const H3=(e,t)=>`<h3 class="ph">${pic(e,38)}<span>${t}</span></h3>`;
+const qEmoji=t=>{for(const [r,e] of [[/ambulance|emergency number/i,'🚑'],[/prize|scam|fee/i,'🎁'],[/password/i,'🔐'],[/online|message|phone|link/i,'📱'],[/water|drink/i,'💧'],[/food|cooked|leftover|fruit|vegetable/i,'🍲'],[/malaria|mosquito/i,'🦟'],[/teeth|brush/i,'🦷'],[/seat belt|car|bus|road/i,'🚗'],[/dog|snake|bite/i,'🐕'],[/fire|burn|smoke/i,'🔥'],[/wash|hand|soap/i,'🧼'],[/bleed|cut|wound/i,'🩹']])if(r.test(t))return e;return '🎓'};
+/* ---- Safety tips: a new topic every day (AI writes it when online; otherwise the built-in topics rotate) ---- */
+async function loadDaily(){const k=dayKey();if((store.get('dailyTopic',{})||{}).k===k)return;
+  try{const used=store.get('usedTopics',[]);
+    const txt=await askAI(`Give ONE new safety topic for school children and teachers in Kenya for today (${new Date().toDateString()}). Do not use these topics: ${[...TIPS.map(t=>t.c),...used].join(', ')}. Reply ONLY with JSON: {"topic":"short title","icon":"one emoji","tips":["tip 1","tip 2","tip 3","tip 4","tip 5"]}. Keep tips short, simple and safe.`);
+    const j=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    if(j.topic&&Array.isArray(j.tips)&&j.tips.length){store.set('dailyTopic',{k,c:String(j.topic),i:String(j.icon||'💡'),l:j.tips.slice(0,6).map(String)});store.set('usedTopics',[...used,String(j.topic)].slice(-60))}}catch(e){}
+  if(S.route==='tips')render()}
+function tipsAsk(){const v=(($('#tq')||{}).value||'').trim();if(!v)return;go('ask');askSend(v)}
+function askToday(){go('ask');askSend('Tell me more about this safety topic: '+S.todayC)}
+function tips(){const k=dayKey();if(S.dailyTried!==k){S.dailyTried=k;loadDaily()}
+  const d=store.get('dailyTopic',null),r=TIPS[Math.floor(Date.now()/864e5)%TIPS.length],T=d&&d.k===k?d:r;S.todayC=T.c;
+  return ['Safety tips',`<div class="card"><h3>🤖 Ask First Aid</h3><div class="askbar"><input id="tq" placeholder="Search any safety topic…" onkeydown="if(event.key==='Enter')tipsAsk()"><button class="btn red" onclick="tipsAsk()">Ask</button></div></div>
+  <div class="card" style="border:2px solid #e11d2e;background:#fff5f6"><span class="pill">Today's topic · ${new Date().toDateString().slice(0,10)}</span>${picH(T.i,96)}<h3 style="margin-top:2px">${esc(T.c)}</h3><ul style="padding-left:20px">${T.l.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><button class="btn ghost" style="margin-top:10px" onclick="askToday()">Ask First Aid about this</button></div>
+  <h3 style="margin:14px 2px 10px">All topics</h3>`+TIPS.map(t=>`<div class="card">${picH(t.i,84)}<h3>${t.c}</h3><ul style="padding-left:20px">${t.l.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')]}
 /* ---- Install screen: shown first to new visitors who opened the link in a browser ---- */
 let DIP=null;
 const isInstalled=()=>(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
@@ -397,11 +528,11 @@ function install(){
 }
 function guides(){
   return ['First aid guide',`<p class="mut" style="margin-bottom:10px">Choose a situation. In a life-threatening emergency, call 112 first.</p>`+
-  GUIDES.map((g,i)=>`<button class="tile" onclick="go('guide',${i})"><i style="background:var(--bg)">${g.i}</i><div>${g.t}<small>${g.s.length} steps</small></div></button>`).join('')];
+  GUIDES.map((g,i)=>`<button class="tile" onclick="go('guide',${i})">${pic(g.i,52)}<div>${g.t}<small>${g.s.length} steps</small></div></button>`).join('')];
 }
 function guide(){
   const g=GUIDES[S.arg];
-  return [g.t,`<div class="gh"><i>${g.i}</i><div><h2>${g.t}</h2><p class="mut">${g.s.length} steps. Stay calm and act step by step.</p></div></div><div class="card">${g.s.map((s,i)=>`<div class="step"><span>${i+1}</span><div>${s}</div></div>`).join('')}</div>
+  return [g.t,`${picH(g.i,120)}<div class="gh"><div><h2>${g.t}</h2><p class="mut">${g.s.length} steps. Stay calm and act step by step.</p></div></div><div class="card">${g.s.map((s,i)=>`<div class="step"><span>${i+1}</span><div>${s}</div></div>`).join('')}</div>
   <button class="btn red block" onclick="location.href='tel:'+mainNum()">Call ${mainNum()} now</button>
   <p class="warn">This guide supports first response only. It does not replace a doctor or trained first aider.</p>`];
 }
@@ -484,8 +615,8 @@ function finishSOS(loc,hp){
 function contacts(){
   const c=userContacts();
   return ['Emergency contacts',`${numsCard()}
-  <div class="card"><h3>Your name</h3><input id="me" placeholder="Name shown in alerts" value="${esc(store.get('me',''))}"><button class="btn block" onclick="store.set('me',$('#me').value.trim()||'A student');this.textContent='Saved'">Save name</button></div>
-  <div class="card"><h3>Alert contacts</h3>${c.length?c.map((x,i)=>`<div class="row" style="padding:8px 0"><div>${esc(x.name)}<div class="mut">${esc(x.phone)}</div></div><button class="btn" onclick="location.href='tel:${esc(x.phone)}'">Call</button><button class="btn ghost" onclick="delC(${i})">✕</button></div>`).join(''):'<p class="mut">None yet. Add parents, a teacher and the school admin.</p>'}
+  <div class="card">${H3('👤','Your name')}<input id="me" placeholder="Name shown in alerts" value="${esc(store.get('me',''))}"><button class="btn block" onclick="store.set('me',$('#me').value.trim()||'A student');this.textContent='Saved'">Save name</button></div>
+  <div class="card">${H3('🚨','Alert contacts')}${c.length?c.map((x,i)=>`<div class="row" style="padding:8px 0"><div>${esc(x.name)}<div class="mut">${esc(x.phone)}</div></div><button class="btn" onclick="location.href='tel:${esc(x.phone)}'">Call</button><button class="btn ghost" onclick="delC(${i})">✕</button></div>`).join(''):'<p class="mut">None yet. Add parents, a teacher and the school admin.</p>'}
   <input id="cn" placeholder="Name (e.g. Mum, School admin)"><input id="cp" type="tel" placeholder="Phone number"><button class="btn block" onclick="addC()">Add contact</button></div>`];
 }
 function addC(){const n=$('#cn').value.trim(),p=$('#cp').value.trim();if(!n||p.replace(/\D/g,'').length<7){alert('Enter a name and a valid phone number.');return}const c=userContacts();c.push({name:n,phone:p});store.set('contacts',c);render()}
@@ -493,10 +624,9 @@ function delC(i){const c=userContacts();c.splice(i,1);store.set('contacts',c);re
 
 /* ---- More / tips / quiz / health ---- */
 function more(){
-  const pf=store.get('profile',{});const m=[...(pf.role==='Admin'?[['admin','🛡️','Admin dashboard']]:[]),['contacts','📇','My contacts'],['scan','📷','Check an injury'],['tips','⚠️','Safety tips'],['quiz','🎓','Life skills quiz'],['alerts','🕒','Alert history']];
-  return ['More',`<div>${m.map(x=>`<button class="tile" onclick="go('${x[0]}')"><i style="background:var(--bg)">${x[1]}</i><div>${x[2]}</div></button>`).join('')}</div><button class="btn ghost block" style="margin-top:6px" onclick="logout()">Sign out (${esc(pf.name||'')})</button>`];
+  const pf=store.get('profile',{});const m=[...(pf.role==='Admin'?[['admin','🛡️','Admin dashboard']]:[]),['ask','🤖','Ask First Aid'],['contacts','📇','My contacts'],['scan','📷','Check an injury'],['tips','⚠️','Safety tips'],['quiz','🎓','Life skills quiz'],['alerts','🕒','Alert history']];
+  return ['More',`<div>${m.map(x=>`<button class="tile" onclick="go('${x[0]}')">${pic(x[1],52)}<div>${x[2]}</div></button>`).join('')}</div><button class="btn ghost block" style="margin-top:6px" onclick="logout()">Sign out (${esc(pf.name||'')})</button>`];
 }
-function tips(){return ['Safety tips',TIPS.map(t=>`<div class="card"><h3>${t.i} ${t.c}</h3><ul style="padding-left:20px">${t.l.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')]}
 function quiz(){
   const q=S.q,L=q.list||(q.list=daily(S.round||0)),no=(S.round||0)+1;
   if(q.done){const p=Math.round(q.sc/L.length*100);return ['Daily life skills quiz',`<div class="card" style="text-align:center;padding:24px 16px"><p class="mut">Quiz ${no} complete</p><div style="font-size:56px;font-weight:800;color:var(--head);line-height:1.1">${q.sc}<span style="font-size:26px;color:var(--mut)"> / ${L.length}</span></div><p style="margin:6px 0 2px"><b>You scored ${q.sc} out of ${L.length} (${p}%)</b></p><p class="mut">${p>=80?'Excellent. You can handle everyday challenges.':p>=50?'Good effort. Review the explanations and try again.':'Keep learning. Read the guides and try again.'}</p></div>
@@ -504,7 +634,7 @@ function quiz(){
   <button class="btn block" style="margin-bottom:10px" onclick="another()">Yes, take another quiz</button>
   <button class="btn ghost block" onclick="go('home')">No, back to home</button>`]}
   const [t,o,a,w]=L[q.i],bs=store.get('qlog',{})[dayKey()];
-  return ['Daily life skills quiz',`<p class="mut">Quiz ${no} · Question ${q.i+1} of ${L.length}${bs!=null?' · Best today: '+bs:''}</p><div class="bar"><i style="width:${q.i/L.length*100}%"></i></div><h3 style="margin-bottom:12px">${t}</h3>
+  return ['Daily life skills quiz',`<p class="mut">Quiz ${no} · Question ${q.i+1} of ${L.length}${bs!=null?' · Best today: '+bs:''}</p><div class="bar"><i style="width:${q.i/L.length*100}%"></i></div>${picH(qEmoji(t),90)}<h3 style="margin-bottom:12px">${t}</h3>
   ${o.map((x,i)=>`<button class="opt ${q.pick!=null?(i===a?'ok':i===q.pick?'bad':''):''}" ${q.pick!=null?'disabled':''} onclick="pickA(${i})">${x}</button>`).join('')}
   ${q.pick!=null?`<div class="card"><b>${q.pick===a?'Correct.':'Not quite.'}</b> ${w}</div><button class="btn block" onclick="nextQ()">${q.i===L.length-1?'See my score':'Next question'}</button>`:''}`];
 }
@@ -532,18 +662,18 @@ function health(){
   else if(!h.list.length)body=`<div class="card"><p>Could not reach the map servers. Check your internet, then try again, or use Google Maps below.</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
   else{const n=[...h.list].sort((a,b)=>a.km-b.km)[0];
     body=`<button class="btn red block" style="font-size:17px;padding:16px" onclick="window.open(dirURL(${n.la},${n.lo}),'_blank')">🧭 Go to the nearest: ${esc(n.name)} (${n.km.toFixed(1)} km)</button>
-    <div class="card" style="margin-top:12px">${h.list.map(x=>`<div class="row" style="padding:8px 0"><div>${esc(x.name)}<div class="mut">${x.km.toFixed(1)} km away</div></div>${x.ph?`<button class="btn ghost" onclick="location.href='tel:${x.ph}'">Call</button>`:''}<button class="btn" onclick="window.open(dirURL(${x.la},${x.lo}),'_blank')">Go</button></div>`).join('')}</div>`}
+    <div class="card" style="margin-top:12px">${h.list.map(x=>`<div class="row" style="padding:8px 0">${pic(/pharm|chemist/i.test(x.name)?'💊':'🏥',46)}<div>${esc(x.name)}<div class="mut">${x.km.toFixed(1)} km away</div></div>${x.ph?`<button class="btn ghost" onclick="location.href='tel:${x.ph}'">Call</button>`:''}<button class="btn" onclick="window.open(dirURL(${x.la},${x.lo}),'_blank')">Go</button></div>`).join('')}</div>`}
   return ['Nearby health centres',body+maps+(h.st!=='load'?'<button class="btn ghost block" style="margin-top:10px" onclick="loadHealth();render()">Refresh</button>':'')+'<p class="warn">In an emergency call '+mainNum()+' first.</p>'];
 }
 
 function alerts(){
   const l=store.get('alerts',[]);
-  return ['Alert history',l.length?l.map(a=>`<div class="card"><b>${a.time}</b><div class="mut">${a.loc?`${a.loc.lat.toFixed(4)}, ${a.loc.lng.toFixed(4)}`:'No GPS fix'} · ${a.sent} contact${a.sent===1?'':'s'}</div></div>`).join(''):'<p class="mut">No alerts sent yet.</p>'];
+  return ['Alert history',l.length?l.map(a=>`<div class="card row">${pic('🚨',46)}<div><b>${a.time}</b><div class="mut">${a.loc?`${a.loc.lat.toFixed(4)}, ${a.loc.lng.toFixed(4)}`:'No GPS fix'} · ${a.sent} contact${a.sent===1?'':'s'}</div></div></div>`).join(''):'<p class="mut">No alerts sent yet.</p>'];
 }
 function numsCard(){
   const adm=store.get('profile',{}).role==='Admin',n=(adm&&S.nums)||getNums();
-  if(!adm)return `<div class="card"><h3>Emergency numbers</h3>${n.map(d=>`<div class="row" style="padding:8px 0"><div>${esc(d[0])}<div class="mut">${esc(d[1])}</div></div><button class="btn" onclick="location.href='tel:${esc(d[1])}'">Call</button></div>`).join('')}<p class="mut">Check these match your area’s official numbers.</p></div>`;
-  return `<div class="card"><h3>Emergency numbers (you can edit)</h3><p class="mut" style="margin-bottom:8px">The first number is used for the top phone icon and the Call buttons.</p>${n.map((d,i)=>`<div class="row" style="margin-bottom:6px"><input class="nn" value="${esc(d[0])}" placeholder="Service name" style="margin:0"><input class="np" value="${esc(d[1])}" placeholder="Number" type="tel" style="margin:0;max-width:130px"><button class="btn ghost" onclick="delN(${i})" aria-label="Remove">✕</button></div>`).join('')}<div class="row" style="margin-top:8px"><button class="btn ghost" onclick="addN()">+ Add number</button><button class="btn" onclick="saveN()">Save changes</button></div></div>`;
+  if(!adm)return `<div class="card">${H3('📞','Emergency numbers')}${n.map(d=>`<div class="row" style="padding:8px 0"><div>${esc(d[0])}<div class="mut">${esc(d[1])}</div></div><button class="btn" onclick="location.href='tel:${esc(d[1])}'">Call</button></div>`).join('')}<p class="mut">Check these match your area’s official numbers.</p></div>`;
+  return `<div class="card">${H3('📞','Emergency numbers (you can edit)')}<p class="mut" style="margin-bottom:8px">The first number is used for the top phone icon and the Call buttons.</p>${n.map((d,i)=>`<div class="row" style="margin-bottom:6px"><input class="nn" value="${esc(d[0])}" placeholder="Service name" style="margin:0"><input class="np" value="${esc(d[1])}" placeholder="Number" type="tel" style="margin:0;max-width:130px"><button class="btn ghost" onclick="delN(${i})" aria-label="Remove">✕</button></div>`).join('')}<div class="row" style="margin-top:8px"><button class="btn ghost" onclick="addN()">+ Add number</button><button class="btn" onclick="saveN()">Save changes</button></div></div>`;
 }
 function readN(keep){const a=[...document.querySelectorAll('.nn')],b=[...document.querySelectorAll('.np')],l=a.map((x,i)=>[x.value.trim(),b[i].value.trim()]);return keep?l:l.filter(r=>r[0]&&r[1])}
 function addN(){S.nums=[...readN(true),['','']];render()}
@@ -589,6 +719,7 @@ function admin(){
   return ['Admin dashboard',`<p class="mut" style="margin-bottom:8px">${useFB?'Live from Firebase.':'Demo mode: showing alerts from this device only.'}</p>
   <div class="row" style="margin-bottom:12px">${stat(c('New'),'New')}${stat(c('Responding'),'Responding')}${stat(c('Resolved'),'Resolved')}</div>`+
   (A.length?A.map(a=>`<div class="card"><div class="row"><div><b>${esc(a.name||'Unknown')}</b><div class="mut">${new Date(a.time).toLocaleString()}</div></div><span class="pill ${a.status}">${a.status}</span></div>
+  ${a.photo?`<img src="${a.photo}" alt="Injury photo" onclick="window.open(this.src)" style="width:100%;max-height:240px;object-fit:contain;border-radius:12px;background:#111;margin-top:8px">`:''}${a.note?`<p style="margin:6px 0">${esc(a.note)}</p>`:''}
   <div style="margin:8px 0">${a.lat!=null?`<a href="https://maps.google.com/?q=${a.lat},${a.lng}" target="_blank" rel="noopener" style="color:var(--head);font-weight:600">View location on map</a>`:'<span class="mut">No GPS location</span>'}</div>
   <div class="row">${['Responding','Resolved'].map(s=>`<button class="btn ${a.status===s?'':'ghost'}" onclick="setSt('${a.id}','${s}')">${s}</button>`).join('')}</div></div>`).join(''):'<div class="card"><p class="mut">No alerts yet.</p></div>')];
 }
