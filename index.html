@@ -13,6 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FirstAid">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <title>FirstAid</title>
 <style>
 :root{--navy:#8f0d1c;--navy2:#e11d2e;--green:#e11d2e;--red:#e11d2e;--ink:#2a0d12;--bg:#fff4f4;--card:#fff;--mut:#8a5a60;--line:#f6dcdc;--sh:0 6px 22px rgba(143,13,28,.12)}
@@ -98,6 +99,15 @@ main{padding:24px max(24px,calc((100% - 1000px)/2)) 12px}
 nav{width:640px;max-width:100%;margin:6px auto 14px}
 #ov{padding:48px}
 }
+#hospitalMap{height:310px;width:100%;border-radius:16px;z-index:1;background:#f1f5f9}
+.hospital-photo{width:100%;height:150px;object-fit:cover;border-radius:15px;display:block;margin-bottom:12px}
+.hospital-item{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.hospital-item:last-child{border-bottom:0}.hospital-pin{width:46px;height:46px;border-radius:14px;background:#ffe3e6;display:grid;place-items:center;font-size:25px;flex:none}
+.map-note{font-size:12px;color:var(--mut);margin-top:7px}
+.ask-home{display:flex;align-items:center;gap:14px;width:100%;padding:18px;border:0;border-radius:20px;margin:12px 0 14px;text-align:left;color:#fff;background:linear-gradient(120deg,#9f1239,#e11d2e 65%,#f97316);box-shadow:0 8px 22px rgba(190,18,60,.22)}
+.ask-home .ask-icon{width:54px;height:54px;border-radius:17px;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:29px;flex:none}
+.ask-home b{display:block;font-size:18px}.ask-home small{display:block;opacity:.92;font-size:13px}
+.leaflet-popup-content{font-size:13px}.leaflet-container{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}
 /* red and white blend */
 :root{color-scheme:light;--bg:#ffffff;--ink:#3b0a12;--line:#f1d3d7}
 .card,.gt,.tile,.opt,nav{border:1px solid var(--line)}
@@ -156,7 +166,7 @@ nav button.on{color:#be123c}
 </style>
 </head>
 <body>
-<header><button id="back" aria-label="Back" hidden>‹ Back</button><h1 id="ttl">FirstAid</h1><button id="callnow" aria-label="Call 112" onclick="location.href='tel:'+mainNum()">📞</button></header>
+<header><button id="back" aria-label="Back" hidden>‹ Back</button><h1 id="ttl">FirstAid</h1></header>
 <main id="app"></main>
 <nav id="nav"></nav>
 <div id="ov" role="alertdialog" aria-live="assertive"></div>
@@ -164,6 +174,7 @@ nav button.on{color:#be123c}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const store={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
@@ -301,7 +312,7 @@ const getNums=()=>store.get('numbers',defaults);
 const mainNum=()=>(getNums()[0]||['','112'])[1];
 const S={route:'home',arg:null,q:{i:0,sc:0,done:false,pick:null}};
 const NAVOF={guide:'guides',scan:'home',health:'home',tips:'home',quiz:'home',contacts:'home',admin:'home',alerts:'more',install:'more'};
-const NAV=[['home','🏠','Home'],['guides','➕','Guides'],['sos','🆘','SOS'],['ask','🤖','Ask AI'],['more','⋯','More']];
+const NAV=[['home','🏠','Home'],['guides','➕','Guides'],['sos','🆘','SOS'],['ask','🤖','Ask First Aid'],['more','⋯','More']];
 
 const W='#e11d2e',P='#ffc9cf',R='#fff';
 const BAN={
@@ -329,13 +340,14 @@ function render(){
   $('#nav').innerHTML=NAV.map(n=>`<button class="${n[0]===(NAVOF[r]||r)?'on':''}${n[0]==='sos'?' sosn':''}" onclick="navTo('${n[0]}')"><b>${n[1]}</b>${n[2]}</button>`).join('');
   if(r==='login'||r==='install')$('#nav').innerHTML='';
   const V={home,guides,guide,scan,install,sos,contacts,more,tips,quiz,health,alerts,login,admin,ask};
-  const o=V[r]();$('#ttl').textContent=o[0];A.innerHTML=(r==='home'?'':banner(r))+o[1];
+  const o=V[r]();$('#ttl').textContent=o[0];A.innerHTML=(r==='home'?'':banner(r))+o[1];if(r==='health'&&S.hl&&S.hl.st==='ok')setTimeout(initHospitalMap,80);
 }
 
 function home(){
   const g=[['scan','#e11d2e','📷','Check an injury','Photo or video'],['health','#be123c','🏥','Nearby hospitals','Find and go'],['contacts','#f97316','📞','Contacts','Call or edit'],['tips','#db2777','⚠️','Safety tips','New topic daily'],['quiz','#9d174d','🎓','Life skills','New questions daily','wide']];
   return ['FirstAid',`<div class="hero"><div class="cross">+</div><div><h2>FirstAid</h2><p>Be prepared. Save lives.</p></div></div>
-  ${store.get('profile',{}).role==='Admin'?`<button class="tile" onclick="go('admin')"><i>🛡️</i><div>Admin dashboard<small>View and respond to emergency alerts</small></div></button>`:''}${banner('home')}<button class="alert" onclick="location.href='tel:'+mainNum()"><i>📞</i><div>Call ${mainNum()} now<small>Emergency services. Use the red SOS button below to alert your contacts</small></div></button>
+  ${store.get('profile',{}).role==='Admin'?`<button class="tile" onclick="go('admin')"><i>🛡️</i><div>Admin dashboard<small>View and respond to emergency alerts</small></div></button>`:''}${banner('home')}
+  <button class="ask-home" onclick="go('ask')"><span class="ask-icon">🤖</span><span><b>Ask First Aid</b><small>Get quick guidance for injuries, illness and emergencies</small></span><span style="margin-left:auto;font-size:26px">›</span></button>
   <div class="grid">${g.map((x,i)=>`<button class="gt${x[5]?' wide':''}" style="--c:${x[1]}" onclick="go('${x[0]}')"><i>${x[2]}</i><div>${x[3]}<small>${x[4]}</small></div></button>`).join('')}</div>`];
 }
 /* ---- Check an injury: add a photo or video, pick what it looks like, see what to do (offline, nothing is uploaded) ---- */
@@ -689,17 +701,16 @@ function loadHealth(){
     .catch(()=>{S.hl={st:'noloc'}}).then(()=>{if(S.route==='health')render()});
 }
 function health(){
-  const h=S.hl||{st:'load'};
-  const maps=`<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"><button class="btn ghost" onclick="findNear('hospital')">🏥 Hospitals in Maps</button><button class="btn ghost" onclick="findNear('clinic')">⚕️ Clinics in Maps</button><button class="btn ghost" onclick="findNear('pharmacy')">💊 Pharmacies in Maps</button></div>`;
-  let body;
-  if(h.st==='load')body=`<div class="card"><p>📍 ${h.loc?'Finding health facilities near you…':'Getting your location…'}</p></div>`;
-  else if(h.st==='noloc')body=`<div class="card"><p>We could not get your location. Turn on location for this app, then try again.</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
-  else if(!h.list.length)body=`<div class="card"><p>Could not reach the map servers. Check your internet, then try again, or use Google Maps below.</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
-  else{const n=[...h.list].sort((a,b)=>a.km-b.km)[0];
-    body=`<button class="btn red block" style="font-size:17px;padding:16px" onclick="window.open(dirURL(${n.la},${n.lo}),'_blank')">🧭 Go to the nearest: ${esc(n.name)} (${n.km.toFixed(1)} km)</button>
-    <div class="card" style="margin-top:12px">${h.list.map(x=>`<div class="row" style="padding:8px 0">${pic(/pharm|chemist/i.test(x.name)?'💊':'🏥',46)}<div>${esc(x.name)}<div class="mut">${x.km.toFixed(1)} km away</div></div>${x.ph?`<button class="btn ghost" onclick="location.href='tel:${x.ph}'">Call</button>`:''}<button class="btn" onclick="window.open(dirURL(${x.la},${x.lo}),'_blank')">Go</button></div>`).join('')}</div>`}
-  return ['Nearby health centres',body+maps+(h.st!=='load'?'<button class="btn ghost block" style="margin-top:10px" onclick="loadHealth();render()">Refresh</button>':'')+'<p class="warn">In an emergency call '+mainNum()+' first.</p>'];
+  const h=S.hl||{st:'load'};let body='';
+  if(h.st==='load')body=`<div class="card"><p>📍 ${h.loc?'Finding health facilities near you…':'Getting your location…'}</p><p class="mut" style="margin-top:6px">Nearby facilities will appear on the map.</p></div>`;
+  else if(h.st==='noloc')body=`<div class="card"><p>We could not get your location. Allow location access for this app, then try again.</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
+  else if(!h.list.length)body=`<div class="card"><p>No nearby hospitals were returned. Check your internet connection or try again.</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
+  else{const n=[...h.list].sort((a,b)=>a.km-b.km)[0];body=`<div class="card"><img class="hospital-photo" src="https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=1000&q=80" alt="Illustrative hospital building" onerror="this.style.display='none'"><h3>Hospitals and clinics near you</h3><p class="mut">Showing ${h.list.length} nearby facilities, ordered by distance.</p><div style="margin-top:12px"><div id="hospitalMap" aria-label="Map showing nearby hospitals and clinics"></div><p class="map-note">Map data © OpenStreetMap contributors. Tap a marker to see the facility name.</p></div></div><button class="btn red block" style="font-size:16px;padding:15px;margin-bottom:12px" onclick="window.open(dirURL(${n.la},${n.lo}),'_blank')">🧭 Directions to nearest: ${esc(n.name)}</button><div class="card"><h3>Nearby facilities</h3>${h.list.map((x,i)=>`<div class="hospital-item"><div class="hospital-pin">${x.h?'🏥':'⚕️'}</div><div style="flex:1;min-width:0"><b>${esc(x.name)}</b><div class="mut">${x.km.toFixed(1)} km away · ${x.h?'Hospital':'Clinic'}</div></div>${x.ph?`<button class="btn ghost" onclick="location.href='tel:${x.ph}'">Call</button>`:''}<button class="btn" onclick="focusHospital(${i})">View</button></div>`).join('')}</div>`;}
+  return ['Nearby hospitals',body+(h.st!=='load'?'<button class="btn ghost block" style="margin-top:10px" onclick="loadHealth();render()">Refresh nearby facilities</button>':'')+'<p class="warn">For a life-threatening emergency, seek urgent in-person help immediately.</p>'];
 }
+let hospitalMap=null,hospitalMarkers=[];
+function initHospitalMap(){const h=S.hl,el=document.getElementById('hospitalMap');if(!el||!h||!h.loc||!h.list||!h.list.length||typeof L==='undefined')return;if(hospitalMap){hospitalMap.remove();hospitalMap=null;hospitalMarkers=[];}hospitalMap=L.map(el).setView([h.loc.lat,h.loc.lng],13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'}).addTo(hospitalMap);L.marker([h.loc.lat,h.loc.lng]).addTo(hospitalMap).bindPopup('Your current location');h.list.forEach(x=>{const m=L.marker([x.la,x.lo]).addTo(hospitalMap).bindPopup(`<b>${esc(x.name)}</b><br>${x.km.toFixed(1)} km away`);hospitalMarkers.push(m);});setTimeout(()=>hospitalMap&&hospitalMap.invalidateSize(),150);}
+function focusHospital(i){const h=S.hl&&S.hl.list&&S.hl.list[i],m=hospitalMarkers[i];if(!h||!m||!hospitalMap)return;hospitalMap.setView([h.la,h.lo],16);m.openPopup();}
 
 function alerts(){
   const l=store.get('alerts',[]);
