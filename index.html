@@ -134,6 +134,25 @@ nav:empty{display:none}
 .pic span{position:relative;line-height:1;z-index:1}
 .pic.hero{width:100%;border-radius:20px;margin-bottom:12px}
 .ph{display:flex;align-items:center;gap:10px}
+/* blended red theme: red stays the lead colour, softened with rose, coral and warm orange */
+:root{--head:#be123c;--bg:#fff6f5;--line:#f6d9d9;--sh:0 6px 20px rgba(190,18,60,.12)}
+body{background:linear-gradient(180deg,#fff5f5 0%,#fff0ef 55%,#fff7ed 100%)}
+header{background:linear-gradient(120deg,#be123c 0%,#e11d2e 55%,#f97316 135%);color:#fff;border-bottom:0;box-shadow:0 8px 24px rgba(190,18,60,.32)}
+header h1{color:#fff}header button{background:rgba(255,255,255,.22);color:#fff}
+.ban{background:linear-gradient(135deg,#be123c,#e11d2e 55%,#fb7185);color:#fff;border:0}
+.alert{background:linear-gradient(135deg,#e11d2e,#f43f5e 60%,#fb923c)}
+.btn,.btn.red{background:linear-gradient(135deg,#e11d2e,#f43f5e)}.btn.ghost{background:#ffe9eb;color:#9f1239}
+.gt{border-top:4px solid var(--c,#e11d2e)}.gt i,.tile i{background:color-mix(in srgb,var(--c,#e11d2e) 16%,#fff)}
+.card h3{color:#9f1239}.step span{background:linear-gradient(135deg,#e11d2e,#fb923c)}
+nav button.on{color:#be123c}
+.msg.u{background:linear-gradient(135deg,#e11d2e,#f43f5e)}
+.m2 .msg.a{flex:1;min-width:0}.msg{line-height:1.55}.msg p{margin:0 0 8px}.msg ol,.msg ul{margin:4px 0 8px;padding-left:22px}.msg li{margin-bottom:5px}.msg b{color:#9f1239}.msg.u b{color:#fff}
+.w112{background:#fff1f2;border-left:4px solid #e11d2e;padding:8px 10px;border-radius:10px}
+.aicard{display:block;width:100%;background:#fff;border:1px solid var(--line);border-left:5px solid #e11d2e;border-radius:18px;padding:14px;margin:10px 0;box-shadow:var(--sh);line-height:1.55}
+.aih{display:flex;align-items:center;gap:10px;margin-bottom:10px;color:#9f1239}.aib p{margin:0 0 8px}.aib ol,.aib ul{margin:4px 0 10px;padding-left:22px}.aib li{margin-bottom:5px}.aib b{color:#9f1239}
+.libi{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:16px;margin-bottom:8px;box-shadow:var(--sh)}.libi.cur{border-color:#e11d2e}
+.libo{flex:1;display:flex;align-items:center;gap:10px;text-align:left;background:none;border:0;padding:10px;color:var(--ink);min-width:0}.libo div{min-width:0}.libo b{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.libo small{color:var(--mut);font-size:12.5px}
+.libd{background:none;border:0;font-size:18px;padding:10px 12px}
 </style>
 </head>
 <body>
@@ -281,7 +300,8 @@ const defaults=[['Ambulance','112'],['Police','999'],['Fire brigade','998']];
 const getNums=()=>store.get('numbers',defaults);
 const mainNum=()=>(getNums()[0]||['','112'])[1];
 const S={route:'home',arg:null,q:{i:0,sc:0,done:false,pick:null}};
-const NAV=[['home','🏠','Home'],['guides','➕','Guides'],['sos','🆘','SOS'],['health','🏥','Hospitals'],['more','⋯','More']];
+const NAVOF={guide:'guides',scan:'home',health:'home',tips:'home',quiz:'home',contacts:'home',admin:'home',alerts:'more',install:'more'};
+const NAV=[['home','🏠','Home'],['guides','➕','Guides'],['sos','🆘','SOS'],['ask','🤖','Ask AI'],['more','⋯','More']];
 
 const W='#e11d2e',P='#ffc9cf',R='#fff';
 const BAN={
@@ -306,17 +326,17 @@ function render(){
   if(!isInstalled()&&!S.skipped)S.route='install';else if(!store.get('profile',null)&&S.route!=='login')S.route='login';
   const r=S.route,A=$('#app');
   $('#back').hidden=r==='home'||r==='login'||r==='install';
-  $('#nav').innerHTML=NAV.map(n=>`<button class="${n[0]===r||(r==='guide'&&n[0]==='guides')?'on':''}${n[0]==='sos'?' sosn':''}" onclick="navTo('${n[0]}')"><b>${n[1]}</b>${n[2]}</button>`).join('');
+  $('#nav').innerHTML=NAV.map(n=>`<button class="${n[0]===(NAVOF[r]||r)?'on':''}${n[0]==='sos'?' sosn':''}" onclick="navTo('${n[0]}')"><b>${n[1]}</b>${n[2]}</button>`).join('');
   if(r==='login'||r==='install')$('#nav').innerHTML='';
   const V={home,guides,guide,scan,install,sos,contacts,more,tips,quiz,health,alerts,login,admin,ask};
   const o=V[r]();$('#ttl').textContent=o[0];A.innerHTML=(r==='home'?'':banner(r))+o[1];
 }
 
 function home(){
-  const g=[['ask','#e11d2e','🤖','Ask First Aid','Free AI help. Search any topic'],['guides','#e11d2e','➕','First aid guide',GUIDES.length+' situations'],['health','#b91c1c','🏥','Nearby hospitals','Find and go'],['scan','#c81e4a','📷','Check an injury','Photo or video'],['contacts','#d9480f','📞','Contacts','Call or edit'],['tips','#a61e4d','⚠️','Safety tips','New topic daily'],['quiz','#7c1d3a','🎓','Life skills','New questions daily']];
+  const g=[['scan','#e11d2e','📷','Check an injury','Photo or video'],['health','#be123c','🏥','Nearby hospitals','Find and go'],['contacts','#f97316','📞','Contacts','Call or edit'],['tips','#db2777','⚠️','Safety tips','New topic daily'],['quiz','#9d174d','🎓','Life skills','New questions daily','wide']];
   return ['FirstAid',`<div class="hero"><div class="cross">+</div><div><h2>FirstAid</h2><p>Be prepared. Save lives.</p></div></div>
-  ${store.get('profile',{}).role==='Admin'?`<button class="tile" onclick="go('admin')"><i>🛡️</i><div>Admin dashboard<small>View and respond to emergency alerts</small></div></button>`:''}${banner('home')}<button class="alert" onclick="go('sos')"><i>SOS</i><div>Emergency alert<small>Send your location to your contacts</small></div></button>
-  <div class="grid">${g.map((x,i)=>`<button class="gt${x[0]==='ask'?' wide':''}" style="--c:${x[1]}" onclick="go('${x[0]}')"><i>${x[2]}</i><div>${x[3]}<small>${x[4]}</small></div></button>`).join('')}</div>`];
+  ${store.get('profile',{}).role==='Admin'?`<button class="tile" onclick="go('admin')"><i>🛡️</i><div>Admin dashboard<small>View and respond to emergency alerts</small></div></button>`:''}${banner('home')}<button class="alert" onclick="location.href='tel:'+mainNum()"><i>📞</i><div>Call ${mainNum()} now<small>Emergency services. Use the red SOS button below to alert your contacts</small></div></button>
+  <div class="grid">${g.map((x,i)=>`<button class="gt${x[5]?' wide':''}" style="--c:${x[1]}" onclick="go('${x[0]}')"><i>${x[2]}</i><div>${x[3]}<small>${x[4]}</small></div></button>`).join('')}</div>`];
 }
 /* ---- Check an injury: add a photo or video, pick what it looks like, see what to do (offline, nothing is uploaded) ---- */
 const SCANG=[
@@ -404,7 +424,7 @@ function scan(){
     ${rows.map(x=>`<button class="tile" onclick="S.scanSel=${x.gi};render();$('#app').scrollTop=0"><i style="background:var(--bg)">${GUIDES[x.gi].i}</i><div>${x.t}<small>${SCANL[x.t]||''}</small></div></button>`).join('')}`]}
   return ['Check an injury',`<div class="card"><h3>📸 Add a photo or video <span class="mut" style="font-weight:400">(optional)</span></h3>
     <p class="mut" style="margin:4px 0 10px">Keep it beside the steps while you help. It stays on your phone unless you tap <b>Send to nurse</b>.</p>
-    ${m?`${m.video?`<video class="prev" src="${m.url}" controls playsinline></video>`:`<img class="prev" src="${m.url}" alt="Your photo">`}<div style="display:flex;gap:8px;margin:8px 0 10px"><textarea id="pn" maxlength="300" placeholder="Short note (what happened?) - optional" oninput="S.photoNote=this.value" style="width:100%;border:1px solid #ddd;border-radius:12px;padding:10px;font:inherit;margin-bottom:8px">${esc(S.photoNote||'')}</textarea>
+    ${m?`${m.video?`<video class="prev" src="${m.url}" controls playsinline></video>`:`<img class="prev" src="${m.url}" alt="Your photo">`}<div style="margin:8px 0 10px"><textarea id="pn" maxlength="300" placeholder="Short note (what happened?) - optional" oninput="S.photoNote=this.value" style="width:100%;border:1px solid #ddd;border-radius:12px;padding:10px;font:inherit;margin-bottom:8px">${esc(S.photoNote||'')}</textarea>
     ${m.video?'<p class="mut">Videos are too big to send for free. Use Share to send by WhatsApp.</p>':(S.sent?'<p style="color:#0d4a27;font-weight:700;margin:6px 0">✅ Sent to the nurse / admin</p>':`<button class="btn red block" ${S.sending?'disabled':''} onclick="sendPhoto()">${S.sending?'Sending…':'📤 Send to nurse'}</button>`)}
     ${photoAIBox()}<div style="display:flex;gap:8px;margin:8px 0 10px"><button class="btn ghost" onclick="shareMedia()">Share</button><button class="btn ghost" onclick="clearMedia()">Remove</button></div>`:''}
     <div class="mgrid">
@@ -455,7 +475,7 @@ function fmt(t){const L=esc(t).split('\n');let o='',ul=false,ol=false;const clos
     if(m=l.match(/^\s*#{1,4}\s+(.*)/)){close();o+='<p><b>'+m[1]+'</b></p>'}
     else if(m=l.match(/^\s*[-*•]\s+(.*)/)){if(!ol&&!ul||ol){close();o+='<ul>';ul=true}o+='<li>'+m[1]+'</li>'}
     else if(m=l.match(/^\s*\d+[.)]\s+(.*)/)){if(!ol){close();o+='<ol>';ol=true}o+='<li>'+m[1]+'</li>'}
-    else{close();if(l.trim())o+='<p>'+l+'</p>'}}
+    else{close();if(l.trim())o+=(/<b>/.test(l)&&/112/.test(l)?'<p class="w112">':'<p>')+l+'</p>'}}
   close();return o}
 function localAnswer(q){const w=q.toLowerCase().split(/[^a-z]+/).filter(x=>x.length>2),sc=t=>w.reduce((n,k)=>n+(t.includes(k)?1:0),0);
   const G=GUIDES.map(g=>({g,n:sc((g.t+' '+g.s.join(' ')).toLowerCase())+3*sc(g.t.toLowerCase())})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n)[0];
@@ -465,9 +485,20 @@ function localAnswer(q){const w=q.toLowerCase().split(/[^a-z]+/).filter(x=>x.len
   return `I need the internet to answer that. In an emergency call ${mainNum()} now.`}
 const scrollEnd=()=>{const a=$('#app');if(a)a.scrollTop=a.scrollHeight};
 const tmf=t=>new Date(t||Date.now()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-const saveChat=()=>store.set('askChat',(S.chat||[]).filter(m=>!m.pending&&!m.err).slice(-40));
+function libSave(C){if(!C.length)return;if(!S.chatId)S.chatId='c'+Date.now();store.set('askChatId',S.chatId);
+  const L=store.get('askLib',[]),i=L.findIndex(x=>x.id===S.chatId),e={id:S.chatId,title:String((C.find(m=>m.r==='u')||{}).t||'Chat').slice(0,48),ts:Date.now(),msgs:C};
+  if(i>=0)L[i]=e;else L.unshift(e);store.set('askLib',L.slice(0,30))}
+const saveChat=()=>{const C=(S.chat||[]).filter(m=>!m.pending&&!m.err).slice(-60);store.set('askChat',C);libSave(C)};
+function libHTML(){const L=store.get('askLib',[]);
+  if(!L.length)return '<div class="card"><p class="mut">No saved chats yet. Every conversation is saved here automatically, so you can come back to it later.</p></div>';
+  return '<p class="mut" style="margin-bottom:8px">Your saved chats</p>'+L.map(x=>`<div class="libi${x.id===S.chatId?' cur':''}"><button class="libo" onclick="openChat('${x.id}')">${pic('💬',44)}<div><b>${esc(x.title)}</b><small>${new Date(x.ts).toLocaleDateString([],{day:'numeric',month:'short'})} · ${x.msgs.length} messages</small></div></button><button class="libd" onclick="delChat('${x.id}')" aria-label="Delete chat">🗑</button></div>`).join('')+'<button class="btn ghost block" style="margin-top:10px" onclick="clearLib()">Delete all chats</button>'}
+function openChat(id){const x=store.get('askLib',[]).find(c=>c.id===id);if(!x||S.askBusy)return;S.chat=x.msgs.map(m=>({...m}));S.chatId=id;S.askLibOpen=false;store.set('askChat',S.chat);store.set('askChatId',id);render();scrollEnd()}
+function delChat(id){store.set('askLib',store.get('askLib',[]).filter(c=>c.id!==id));if(S.chatId===id){S.chat=[];S.chatId=null;store.set('askChat',[]);store.set('askChatId',null)}render()}
+function clearLib(){store.set('askLib',[]);S.chat=[];S.chatId=null;store.set('askChat',[]);store.set('askChatId',null);render()}
+function toggleLib(){S.askLibOpen=!S.askLibOpen;render()}
+function photoToChat(){if(!S.photoRaw)return;S.chat=[{r:'u',t:'📷 Photo check'+(S.photoNote?': '+S.photoNote:''),ts:Date.now()},{r:'a',raw:S.photoRaw,ts:Date.now()}];S.chatId=null;S.askLibOpen=false;saveChat();go('ask')}
 function chatHist(){const C=S.chat||[],h=[];for(let i=0;i<C.length-1;i++){const u=C[i],a=C[i+1];if(u.r==='u'&&a.r==='a'&&!a.err&&!a.pending&&!a.off&&a.raw){h.push({role:'user',parts:[{text:u.t}]},{role:'model',parts:[{text:a.raw}]})}}return h.slice(-12)}
-function chatHTML(){const C=S.chat||[],ch=['🔥 How do I treat a burn?','🐍 What to do for a snake bite','🏫 Fire at school, what now?','🩸 How to stop a nosebleed','💧 Is this water safe to drink?'];
+function chatHTML(){if(S.askLibOpen)return libHTML();const C=S.chat||[],ch=['🔥 How do I treat a burn?','🐍 What to do for a snake bite','🏫 Fire at school, what now?','🩸 How to stop a nosebleed','💧 Is this water safe to drink?'];
   let o=`<div class="m2"><div class="who">🤖</div><div class="msg a"><p>Hi, I am <b>Ask First Aid</b> 👋</p><p>Ask me anything about first aid, health or staying safe. I answer in English or Kiswahili.</p></div></div>`;
   o+=C.map(m=>m.r==='u'?`<div class="m2 u"><div class="msg u">${esc(m.t)}<span class="tm">${tmf(m.ts)}</span></div></div>`
     :`<div class="m2"><div class="who">🤖</div><div class="msg a${m.err?' err':''}">${m.pending?'<span class="dots mut">Ask First Aid is typing</span>':(m.err?`<p>${esc(m.err.t)}</p>${m.err.d?`<div class="errd">${esc(m.err.d.slice(0,200))}</div>`:''}<button class="btn ghost" style="margin-top:8px" onclick="askRetry()">↻ Try again</button>`:fmt(m.raw)+(m.off?'<p class="mut">You are offline, so this came from the app guides.</p>':'')+`<span class="tm">${tmf(m.ts)}</span>`)}</div></div>`).join('');
@@ -475,26 +506,26 @@ function chatHTML(){const C=S.chat||[],ch=['🔥 How do I treat a burn?','🐍 W
   return o}
 function paintChat(){const l=$('#chatlog');if(l){l.innerHTML=chatHTML();scrollEnd()}}
 async function askSend(q){const inp=$('#aq');q=(q||(inp&&inp.value)||'').trim();if(!q||S.askBusy)return;if(inp)inp.value='';
-  if(!S.chat)S.chat=store.get('askChat',[]);const hist=chatHist();
+  if(!S.chat)S.chat=store.get('askChat',[]);if(S.askLibOpen){S.askLibOpen=false;render()}const hist=chatHist();
   const a={r:'a',pending:true,ts:Date.now()};S.chat.push({r:'u',t:q,ts:Date.now()},a);S.askBusy=true;paintChat();
   try{if(!navigator.onLine){a.raw=localAnswer(q);a.off=true}else a.raw=await chatAI(hist,q)}
   catch(e){a.err=await aiFail(e)}
   a.pending=false;a.ts=Date.now();S.askBusy=false;if(!a.err)saveChat();if(S.route==='ask')paintChat()}
 function askRetry(){const C=S.chat||[],a=C[C.length-1],u=C[C.length-2];if(S.askBusy||!a||!a.err||!u)return;C.splice(-2);askSend(u.t)}
-function newChat(){if(S.askBusy)return;S.chat=[];store.set('askChat',[]);paintChat()}
-function ask(){if(!S.chat)S.chat=store.get('askChat',[]);if(S.chat.length)setTimeout(scrollEnd,30);
+function newChat(){if(S.askBusy)return;S.chat=[];S.chatId=null;S.askLibOpen=false;store.set('askChat',[]);store.set('askChatId',null);render()}
+function ask(){if(!S.chat)S.chat=store.get('askChat',[]);if(S.chatId===undefined)S.chatId=store.get('askChatId',null);if(S.chat.length)setTimeout(scrollEnd,30);
   return ['Ask First Aid',`<div class="dang" style="position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:10px;justify-content:space-between"><b>🚨 Emergency? Call now, do not type.</b><button class="btn red" onclick="location.href='tel:'+mainNum()">Call ${mainNum()}</button></div>
-  <div class="chathead"><b>Chat</b><button onclick="newChat()">＋ New chat</button></div>
+  <div class="chathead"><button onclick="toggleLib()">${S.askLibOpen?'← Back to chat':'📚 Library'}</button><button onclick="newChat()">＋ New chat</button></div>
   <div id="chatlog">${chatHTML()}</div>
   <div class="sticky"><div class="askbar"><input id="aq" placeholder="Type your question…" autocomplete="off" enterkeyhint="send" onkeydown="if(event.key==='Enter')askSend()"><button class="btn red" onclick="askSend()">Send</button></div>
   <p class="mut" style="font-size:12px;margin-top:6px">Free AI help. Needs internet. Guidance only, not a doctor.</p></div>`]}
-async function askPhoto(){const m=S.media;if(!m||m.video||S.photoBusy)return;S.photoBusy=true;S.photoAI='';render();let h;
+async function askPhoto(){const m=S.media;if(!m||m.video||S.photoBusy)return;S.photoBusy=true;S.photoAI='';S.photoRaw='';render();let h;
   try{if(!navigator.onLine)throw new Error('offline');const data=await shrinkImage(m.file);
-    const txt=await askAI([`The user took this photo of an injury or emergency.${S.photoNote?' Their note: '+S.photoNote:''} Say briefly what you can see (do not diagnose), then give clear first-aid steps. If it looks serious start with **Call ${mainNum()} now**. If the photo is unclear, say so and ask what happened.`,{inlineData:{data:data.split(',')[1],mimeType:'image/jpeg'}}]);h=fmt(txt)}
+    const txt=await askAI([`The user took this photo of an injury or emergency.${S.photoNote?' Their note: '+S.photoNote:''} Say briefly what you can see (do not diagnose), then give clear first-aid steps. If it looks serious start with **Call ${mainNum()} now**. If the photo is unclear, say so and ask what happened.`,{inlineData:{data:data.split(',')[1],mimeType:'image/jpeg'}}]);S.photoRaw=txt;h=fmt(txt)}
   catch(e){const er=navigator.onLine?await aiFail(e):{t:'You are offline. Connect to the internet so Ask First Aid can look at the photo. Meanwhile pick what it looks like below and follow the steps.'};h=`<p>${esc(er.t)}</p>${er.d?`<div class="errd">${esc(er.d.slice(0,200))}</div>`:''}`}
   S.photoAI=h+'<p class="mut">Guidance only, not a diagnosis.</p>';S.photoBusy=false;if(S.route==='scan')render()}
 function photoAIBox(){const m=S.media;if(!m||m.video)return'';
-  return `<button class="btn block" style="margin-bottom:8px" ${S.photoBusy?'disabled':''} onclick="askPhoto()">${S.photoBusy?'Ask First Aid is looking…':'🤖 Ask First Aid: what should I do?'}</button>${S.photoAI?`<div class="msg a" style="max-width:100%">${S.photoAI}</div>`:''}`}
+  return `<button class="btn red block" style="margin-bottom:8px" ${S.photoBusy?'disabled':''} onclick="askPhoto()">${S.photoBusy?'Ask First Aid is looking…':'🤖 Ask First Aid: what should I do?'}</button>${S.photoAI?`<div class="aicard"><div class="aih">${pic('🤖',36)}<b>Ask First Aid says</b></div><div class="aib">${S.photoAI}</div>${S.photoRaw?'<button class="btn red block" onclick="photoToChat()">💬 Continue in chat</button>':''}</div>`:''}`}
 /* ---- Pictures: every item gets a matching illustration tile ---- */
 const pic=(e,n)=>`<div class="pic" style="width:${n}px;height:${n}px;font-size:${Math.round(n*.55)}px"><span>${e}</span></div>`;
 const picH=(e,h)=>`<div class="pic hero" style="height:${h||100}px;font-size:${Math.round((h||100)*.62)}px"><span>${e}</span></div>`;
@@ -628,7 +659,7 @@ function delC(i){const c=userContacts();c.splice(i,1);store.set('contacts',c);re
 
 /* ---- More / tips / quiz / health ---- */
 function more(){
-  const pf=store.get('profile',{});const m=[...(pf.role==='Admin'?[['admin','🛡️','Admin dashboard']]:[]),['ask','🤖','Ask First Aid'],['contacts','📇','My contacts'],['scan','📷','Check an injury'],['tips','⚠️','Safety tips'],['quiz','🎓','Life skills quiz'],['alerts','🕒','Alert history']];
+  const pf=store.get('profile',{});const m=[['alerts','🕒','Alert history'],['install','📲','Install the app']];
   return ['More',`<div>${m.map(x=>`<button class="tile" onclick="go('${x[0]}')">${pic(x[1],52)}<div>${x[2]}</div></button>`).join('')}</div><button class="btn ghost block" style="margin-top:6px" onclick="logout()">Sign out (${esc(pf.name||'')})</button>`];
 }
 function quiz(){
