@@ -675,15 +675,27 @@ function startSOS(){
   sosTimer=setInterval(async()=>{n--;if(n>0){draw();return}clearInterval(sosTimer);if(sosCancel)return;finishSOS(await loc,hp)},1000);
 }
 function cancelSOS(){sosCancel=true;clearInterval(sosTimer);$('#ov').className=''}
-function getLoc(){return new Promise(res=>{if(!navigator.geolocation)return res(null);navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),()=>res(null),{enableHighAccuracy:true,timeout:8000,maximumAge:10000})})}
+let locErr='';
+function getLoc(){
+  return new Promise(res=>{
+    if(!navigator.geolocation){locErr='unsupported';return res(null)}
+    const ok=p=>{locErr='';const l={lat:p.coords.latitude,lng:p.coords.longitude};store.set('lastloc',l);res(l)};
+    const fail=e=>{locErr=e&&e.code===1?'denied':'unavailable';const last=store.get('lastloc',null);res(e&&e.code!==1&&last?last:null)};
+    navigator.geolocation.getCurrentPosition(ok,e=>{
+      if(e&&e.code===1)return fail(e);
+      navigator.geolocation.getCurrentPosition(ok,fail,{enableHighAccuracy:false,timeout:20000,maximumAge:600000});
+    },{enableHighAccuracy:true,timeout:10000,maximumAge:60000});
+  })}
 function kmBetween(a,b,c,d){const t=x=>x*Math.PI/180,dl=t(c-a),dn=t(d-b),h=Math.sin(dl/2)**2+Math.cos(t(a))*Math.cos(t(c))*Math.sin(dn/2)**2;return 12742*Math.asin(Math.sqrt(h))}
 /* Nearby hospitals from OpenStreetMap (free, no key). Tries 3 servers at once, widens the search, then a second service. */
-const OVP=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];
+const OVP=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter','https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
 function ovQuery(R,loc){
-  const q=`[out:json][timeout:20];nwr["amenity"~"^(hospital|clinic)$"](around:${R},${loc.lat},${loc.lng});out center tags 80;`;
-  const one=async u=>{const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),14000);
+  const a=`(around:${R},${loc.lat},${loc.lng})`;
+  const q=`[out:json][timeout:25];(nwr["amenity"~"^(hospital|clinic|doctors|health_post)$"]${a};nwr["healthcare"~"^(hospital|clinic|centre|doctor)$"]${a};);out center tags 100;`;
+  const one=async u=>{const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),20000);
     try{const r=await fetch(u,{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'},signal:ac.signal});
-      if(!r.ok)throw new Error('http '+r.status);const j=await r.json();if(!j.elements)throw new Error('bad');return j.elements}
+      if(!r.ok)throw new Error('http '+r.status);const j=await r.json();
+      if(!j.elements||(!j.elements.length&&j.remark))throw new Error('overloaded');return j.elements}
     finally{clearTimeout(tm)}};
   return Promise.any(OVP.map(one));
 }
@@ -693,19 +705,26 @@ function toFac(e,loc){const t=e.tags||{},la=e.lat??(e.center&&e.center.lat),lo=e
   const commons=t.wikimedia_commons||'';
   const specs=String(t['healthcare:speciality']||t['healthcare:specialty']||t['medical:specialty']||t.speciality||'').split(/[;,|]/).map(v=>v.trim()).filter(Boolean);
   const services=String(t.healthcare||t['healthcare:facility']||'').split(/[;,|]/).map(v=>v.trim()).filter(Boolean);
-  return{name:t.name||(t.amenity==='hospital'?'Hospital':'Clinic'),la,lo,ph,km:kmBetween(loc.lat,loc.lng,la,lo),h:t.amenity==='hospital',image:rawImg,commons,website:t.website||t['contact:website']||'',operator:t.operator||'',services:[...new Set([...specs,...services])],emergency:t.emergency||''}}
+  const isH=t.amenity==='hospital'||t.healthcare==='hospital';return{name:t.name||(isH?'Hospital':'Clinic'),la,lo,ph,km:kmBetween(loc.lat,loc.lng,la,lo),h:isH,image:rawImg,commons,website:t.website||t['contact:website']||'',operator:t.operator||'',services:[...new Set([...specs,...services])],emergency:t.emergency||''}}
+let hospErr='';
 async function nominatim(loc){
-  const d=0.35,u=`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=15&bounded=1&viewbox=${loc.lng-d},${loc.lat+d},${loc.lng+d},${loc.lat-d}&q=hospital`;
-  const r=await fetch(u);if(!r.ok)throw new Error('http '+r.status);const a=await r.json();
-  return a.map(x=>({name:x.name||String(x.display_name||'Hospital').split(',')[0],la:+x.lat,lo:+x.lon,ph:'',km:kmBetween(loc.lat,loc.lng,+x.lat,+x.lon),h:true,image:'',commons:'',services:[]}));
+  const d=0.5,vb=`${loc.lng-d},${loc.lat+d},${loc.lng+d},${loc.lat-d}`;
+  let out=[],fails=0,terms=['hospital','clinic','health centre'];
+  for(const q of terms){
+    try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=15&bounded=1&viewbox=${vb}&q=${encodeURIComponent(q)}`);
+      if(!r.ok)throw new Error('http '+r.status);out=out.concat(await r.json());if(out.length>=3)break}
+    catch(e){fails++}
+  }
+  if(!out.length&&fails===terms.length)throw new Error('net');
+  return out.map(x=>({name:x.name||String(x.display_name||'Hospital').split(',')[0],la:+x.lat,lo:+x.lon,ph:'',km:kmBetween(loc.lat,loc.lng,+x.lat,+x.lon),h:x.type==='hospital',image:'',commons:'',services:[]}));
 }
 async function findHospitals(loc){
-  if(!loc)return null;
+  if(!loc)return null;hospErr='';
   const key='hosp:'+loc.lat.toFixed(1)+','+loc.lng.toFixed(1);
   const fin=l=>{l=l.filter((x,i,a)=>a.findIndex(y=>y.name===x.name&&Math.abs(y.la-x.la)<0.0005&&Math.abs(y.lo-x.lo)<0.0005)===i).sort((a,b)=>a.km-b.km).slice(0,6);if(l.length)store.set(key,l);return l};
-  try{let els=await ovQuery(15000,loc);if(!els.length)els=await ovQuery(40000,loc);
-    const l=fin(els.map(e=>toFac(e,loc)).filter(Boolean));if(l.length)return l}catch(e){}
-  try{const l=fin(await nominatim(loc));if(l.length)return l}catch(e){}
+  try{let els=await ovQuery(20000,loc);if(!els.length)els=await ovQuery(60000,loc);
+    const l=fin(els.map(e=>toFac(e,loc)).filter(Boolean));if(l.length)return l;hospErr='none'}catch(e){hospErr='net'}
+  try{const l=fin(await nominatim(loc));if(l.length){hospErr='';return l}}catch(e){}
   const old=store.get(key,null);return old&&old.length?old:null;
 }
 function finishSOS(loc,hp){
@@ -779,8 +798,8 @@ function loadHealth(){
 function health(){
   const h=S.hl||{st:'load'};let body='';
   if(h.st==='load')body=`<div class="card"><p>📍 ${h.loc?'Finding health facilities near you…':'Getting your location…'}</p><p class="mut" style="margin-top:6px">Nearby facilities will appear on the map.</p></div>`;
-  else if(h.st==='noloc')body=`<div class="card"><p>We could not get your location. Allow location access for this app, then try again.</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
-  else if(!h.list.length)body=`<div class="card"><p>No nearby hospitals were returned. Check your internet connection or try again.</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
+  else if(h.st==='noloc')body=`<div class="card"><p>${locErr==='denied'?'Location is blocked for this app. Tap the lock icon next to the address bar (or Site settings), set Location to Allow, then try again.':'Location is on, but your phone or laptop could not get a position in time. Go near a window or outdoors, make sure device Location is on, then try again.'}</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
+  else if(!h.list.length)body=`<div class="card"><p>${hospErr==='none'?'No hospitals or clinics are mapped within 60 km of you in OpenStreetMap. Try again later, or call 112 in an emergency.':'The hospital map servers did not respond. Check your internet connection and try again.'}</p><button class="btn block" style="margin-top:8px" onclick="loadHealth();render()">Try again</button></div>`;
   else{const n=[...h.list].sort((a,b)=>a.km-b.km)[0];body=`<div class="card"><h3>Hospitals and clinics near you</h3><p class="mut">Clear satellite map. Tap a facility and choose View for its full-screen map, photos and services.</p><div class="hospital-map-wrap"><div id="hospitalMap" aria-label="Satellite map showing your location and nearby hospitals"></div><div class="hospital-map-legend"><span><i style="background:#2563eb"></i>Your location</span><span><i style="background:#dc2626"></i>Hospitals</span><span><i style="background:#0d9488"></i>Clinics</span></div><p class="map-note">Satellite imagery is supplied by Esri. Image clarity and age depend on the available satellite coverage; it is not live video.</p></div></div><button class="btn red block" style="font-size:17px;padding:16px;margin:0 0 12px" onclick="window.open(dirURL(${n.la},${n.lo}),'_blank')">🧭 GO to nearest: ${esc(n.name)}</button><div class="card"><h3>Nearby facilities</h3>${h.list.map((x,i)=>`<div class="hospital-item"><div class="hospital-pin">${x.h?'🏥':'⚕️'}</div><div style="flex:1;min-width:0"><b>${esc(x.name)}</b><div class="mut">${x.km.toFixed(1)} km away · ${x.h?'Hospital':'Clinic'}</div></div>${x.ph?`<button class="btn ghost" onclick="location.href='tel:${x.ph}'">Call</button>`:''}<button class="btn ghost" onclick="openHospitalView(${i})">View</button><button class="btn red" onclick="window.open(dirURL(${x.la},${x.lo}),'_blank')">GO</button></div>`).join('')}</div>`;}
   return ['Nearby hospitals',body+(h.st!=='load'?'<button class="btn ghost block" style="margin-top:10px" onclick="loadHealth();render()">Refresh nearby facilities</button>':'')+'<p class="warn">For a life-threatening emergency, seek urgent in-person help immediately.</p>'];
 }
